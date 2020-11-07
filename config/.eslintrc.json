@@ -1,0 +1,9 @@
+{
+  "rules": {
+    // allow 'require' as it is called on nodejs side
+    "@typescript-eslint/no-var-requires": ["off"],
+
+    // relax comments length, so I don't need to fix them (ejected from CRA)
+    "max-len": ["error", {"code": 200, "comments": 100, "ignoreUrls": true}]
+  }
+}

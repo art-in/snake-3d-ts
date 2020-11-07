@@ -1,0 +1,14 @@
+{
+	"name": "snake-3d-ts",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"settings": { 
+		"terminal.integrated.shell.linux": "/bin/bash"
+	},
+	"extensions": [
+		"dbaeumer.vscode-eslint",
+		"ms-vscode.vscode-typescript-tslint-plugin"
+	],
+	"forwardPorts": [3000],
+}

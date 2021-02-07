@@ -30,3 +30,8 @@ declare module '*.css' {
   const classes: {readonly [key: string]: string};
   export default classes;
 }
+
+declare module '*.glsl' {
+  const contents: string;
+  export default contents;
+}

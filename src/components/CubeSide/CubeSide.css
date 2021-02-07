@@ -1,0 +1,18 @@
+.root {
+  position: absolute;
+}
+
+.root > canvas {
+  width: 200px !important;
+  height: 200px !important;
+}
+
+.root.front {
+  top: 10px;
+  right: 10px;
+}
+
+.root.back {
+  bottom: 10px;
+  right: 10px;
+}

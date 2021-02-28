@@ -323,6 +323,66 @@ export function inverse(m: TMatrix4): TMatrix4 {
 }
 
 /**
+ * Multiply by translation matrix.
+ * @param {Matrix4} m matrix to multiply
+ * @param {number} tx x translation.
+ * @param {number} ty y translation.
+ * @param {number} tz z translation.
+ * @param {Matrix4} [dst] optional matrix to store result
+ * @return {Matrix4} dst or a new matrix if none provided
+ * @memberOf module:webgl-3d-math
+ */
+export function translate(
+  m: TMatrix4,
+  tx: number,
+  ty: number,
+  tz: number
+): TMatrix4 {
+  // This is the optimized version of
+  // return multiply(m, translation(tx, ty, tz), dst);
+  const dst = new Float32Array(16);
+
+  const m00 = m[0];
+  const m01 = m[1];
+  const m02 = m[2];
+  const m03 = m[3];
+  const m10 = m[1 * 4 + 0];
+  const m11 = m[1 * 4 + 1];
+  const m12 = m[1 * 4 + 2];
+  const m13 = m[1 * 4 + 3];
+  const m20 = m[2 * 4 + 0];
+  const m21 = m[2 * 4 + 1];
+  const m22 = m[2 * 4 + 2];
+  const m23 = m[2 * 4 + 3];
+  const m30 = m[3 * 4 + 0];
+  const m31 = m[3 * 4 + 1];
+  const m32 = m[3 * 4 + 2];
+  const m33 = m[3 * 4 + 3];
+
+  if (m !== dst) {
+    dst[0] = m00;
+    dst[1] = m01;
+    dst[2] = m02;
+    dst[3] = m03;
+    dst[4] = m10;
+    dst[5] = m11;
+    dst[6] = m12;
+    dst[7] = m13;
+    dst[8] = m20;
+    dst[9] = m21;
+    dst[10] = m22;
+    dst[11] = m23;
+  }
+
+  dst[12] = m00 * tx + m10 * ty + m20 * tz + m30;
+  dst[13] = m01 * tx + m11 * ty + m21 * tz + m31;
+  dst[14] = m02 * tx + m12 * ty + m22 * tz + m32;
+  dst[15] = m03 * tx + m13 * ty + m23 * tz + m33;
+
+  return dst;
+}
+
+/**
  * Multiply by an x rotation matrix
  * @param {TMatrix4} m matrix to multiply
  * @param {number} angleInRadians amount to rotate
@@ -407,6 +467,49 @@ export function yRotate(m: TMatrix4, angleInRadians: number): TMatrix4 {
     res[5] = m[5];
     res[6] = m[6];
     res[7] = m[7];
+    res[12] = m[12];
+    res[13] = m[13];
+    res[14] = m[14];
+    res[15] = m[15];
+  }
+
+  return res;
+}
+
+/**
+ * Multiply by a scaling matrix
+ * @param {Matrix4} m matrix to multiply
+ * @param {number} sx x scale.
+ * @param {number} sy y scale.
+ * @param {number} sz z scale.
+ * @param {Matrix4} [dst] optional matrix to store result
+ * @return {Matrix4} dst or a new matrix if none provided
+ * @memberOf module:webgl-3d-math
+ */
+export function scale(
+  m: TMatrix4,
+  sx: number,
+  sy: number,
+  sz: number
+): TMatrix4 {
+  // This is the optimized version of
+  // return multiply(m, scaling(sx, sy, sz), dst);
+  const res = new Float32Array(16);
+
+  res[0] = sx * m[0 * 4 + 0];
+  res[1] = sx * m[0 * 4 + 1];
+  res[2] = sx * m[0 * 4 + 2];
+  res[3] = sx * m[0 * 4 + 3];
+  res[4] = sy * m[1 * 4 + 0];
+  res[5] = sy * m[1 * 4 + 1];
+  res[6] = sy * m[1 * 4 + 2];
+  res[7] = sy * m[1 * 4 + 3];
+  res[8] = sz * m[2 * 4 + 0];
+  res[9] = sz * m[2 * 4 + 1];
+  res[10] = sz * m[2 * 4 + 2];
+  res[11] = sz * m[2 * 4 + 3];
+
+  if (m !== res) {
     res[12] = m[12];
     res[13] = m[13];
     res[14] = m[14];

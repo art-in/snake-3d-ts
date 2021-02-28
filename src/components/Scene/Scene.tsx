@@ -1,14 +1,13 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-
 import * as sceneActions from '../../state/actions/scene-actions';
 import * as sceneDrawer from '../../drawers/scene/scene-drawer';
 import ISize from '../../state/models/ISize';
 import assertNotEmpty from '../../helpers/assertNotEmpty';
 import State from '../../state/models/State';
 import {handleControlEvents} from './events-manager';
-import CubeSide from '../CubeSide';
 import {ECubeSide} from '../../state/models/ECubeSide';
 import resizeCanvas from '../../helpers/resizeCanvas';
+import CubeSide from '../CubeSide';
 
 interface ISceneProps {
   state: State;
@@ -58,19 +57,17 @@ export default function Scene({state}: ISceneProps): JSX.Element {
     requestAnimationFrame(renderCycle);
   }, []);
 
-  useEffect(() => {
-    renderCycle();
-  }, []);
+  useEffect(renderCycle, []);
 
   return (
     <>
       <canvas ref={canvasRef} />
-      {isInitialized && (
+      {/* {isInitialized && (
         <>
           <CubeSide state={state} side={ECubeSide.Front} />
           <CubeSide state={state} side={ECubeSide.Back} />
         </>
-      )}
+      )} */}
     </>
   );
 }

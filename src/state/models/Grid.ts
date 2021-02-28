@@ -1,4 +1,4 @@
 export default class Grid {
-  rowsCount = 8;
-  colsCount = 8;
+  rowsCount = 16;
+  colsCount = 16;
 }

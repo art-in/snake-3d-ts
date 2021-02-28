@@ -5,8 +5,9 @@ import assertNotEmpty from '../../helpers/assertNotEmpty';
 import {EDirection} from '../models/EDirection';
 import clone from '../../helpers/clone';
 import {ECubeSide} from '../models/ECubeSide';
+import getModelRotationForCubePosition from './get-model-rotation-for-cube-position';
 
-const SNAKE_MOVE_PERIOD = 500; // ms
+const SNAKE_MOVE_PERIOD = 100; // ms
 
 export function moveSnakeCycle(state: State): void {
   const {snake} = state.scene;
@@ -53,6 +54,10 @@ export function moveSnake(state: State): void {
 
   checkForApple(state);
 
+  state.scene.targetRotationDeg = getModelRotationForCubePosition(
+    snake.parts[0].pos,
+    state.scene.grid
+  );
   state.scene.cube[head.pos.cubeSide].needsRedraw = true;
   state.scene.cube[tail.pos.cubeSide].needsRedraw = true;
 }

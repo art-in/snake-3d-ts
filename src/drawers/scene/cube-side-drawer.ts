@@ -15,8 +15,8 @@ export function drawCubeSideCycle(state: State, cubeSide: ECubeSide): void {
   assertNotEmpty(canvas);
   assertNotEmpty(ctx);
 
-  const width = parseInt(canvas.style.width);
-  const height = parseInt(canvas.style.height);
+  const width = canvas.width;
+  const height = canvas.height;
 
   ctx.clearRect(0, 0, width, height);
 
@@ -61,8 +61,6 @@ export function drawCubeSideCycle(state: State, cubeSide: ECubeSide): void {
   ctx.fillText(cubeSideLabel, width - 30, 15);
   ctx.fillText(cubeSideLabel, width - 30, height - 5);
   ctx.fillText(cubeSideLabel, 5, height - 5);
-
-  // console.log('draw side', cubeSideLabel);
 
   side.needsRedraw = false;
   side.needsUpdateOnCube = true;

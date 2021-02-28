@@ -7,16 +7,11 @@ import State from '../models/State';
 export function initCubeSideState(state: State, side: ECubeSide): void {
   const canvas = document.createElement('canvas');
 
-  const size: ISize = {
-    width: 300,
-    height: 300,
-  };
-  resizeCanvas(canvas, size, devicePixelRatio);
+  canvas.width = 2 ** 9;
+  canvas.height = 2 ** 9;
 
   const ctx = canvas.getContext('2d');
   assertNotEmpty(ctx);
-
-  ctx.scale(devicePixelRatio, devicePixelRatio);
 
   state.scene.cube.sides[side].canvas = canvas;
   state.scene.cube.sides[side].ctx = ctx;

@@ -35,3 +35,6 @@ declare module '*.glsl' {
   const contents: string;
   export default contents;
 }
+
+type Radians = number;
+type Degrees = number;

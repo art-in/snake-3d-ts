@@ -1,13 +1,12 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import * as sceneActions from '../../state/actions/scene-actions';
-import * as sceneDrawer from '../../drawers/scene/scene-drawer';
+import * as sceneDrawer from '../../drawers/scene-drawer';
 import ISize from '../../state/models/ISize';
 import assertNotEmpty from '../../helpers/assertNotEmpty';
 import State from '../../state/models/State';
-import {handleControlEvents} from './events-manager';
-import {ECubeSide} from '../../state/models/ECubeSide';
+import {subscribeToControlEvents} from './events-manager';
 import resizeCanvas from '../../helpers/resizeCanvas';
-import CubeSide from '../CubeSide';
+import {action} from 'mobx';
 
 interface ISceneProps {
   state: State;
@@ -47,27 +46,20 @@ export default function Scene({state}: ISceneProps): JSX.Element {
     window.addEventListener('resize', onResize);
     onResize();
     init();
-    handleControlEvents(state, window);
+    subscribeToControlEvents(state, window);
   }, []);
 
-  const renderCycle = useCallback(() => {
-    sceneActions.updateSceneCycle(state);
-    sceneDrawer.drawSceneCycle(state);
+  const renderCycle = useCallback(
+    action(() => {
+      sceneActions.updateSceneCycle(state);
+      sceneDrawer.drawSceneCycle(state);
 
-    requestAnimationFrame(renderCycle);
-  }, []);
+      requestAnimationFrame(renderCycle);
+    }),
+    []
+  );
 
   useEffect(renderCycle, []);
 
-  return (
-    <>
-      <canvas ref={canvasRef} />
-      {/* {isInitialized && (
-        <>
-          <CubeSide state={state} side={ECubeSide.Front} />
-          <CubeSide state={state} side={ECubeSide.Back} />
-        </>
-      )} */}
-    </>
-  );
+  return <canvas ref={canvasRef} />;
 }

@@ -1,10 +1,11 @@
-import assertNotEmpty from '../../helpers/assertNotEmpty';
-import getCubeSideLabel from '../../helpers/getCubeSideLabel';
-import {ECubeSide} from '../../state/models/ECubeSide';
-import State from '../../state/models/State';
+import assertNotEmpty from '../helpers/assertNotEmpty';
+import getCubeSideLabel from '../helpers/getCubeSideLabel';
+import {ECubeSide} from '../state/models/ECubeSide';
+import State from '../state/models/State';
 
 export function drawCubeSideCycle(state: State, cubeSide: ECubeSide): void {
-  const {grid, snake} = state.scene;
+  const {scene, snake} = state;
+  const {grid} = scene.cube;
 
   const side = state.scene.cube[cubeSide];
   if (!side.needsRedraw) {
@@ -23,7 +24,7 @@ export function drawCubeSideCycle(state: State, cubeSide: ECubeSide): void {
   ctx.fillStyle = 'white';
   ctx.fillRect(0, 0, width, height);
 
-  // grid
+  // draw grid
   const cellWidth = width / grid.colsCount;
   const cellHeight = height / grid.rowsCount;
 
@@ -42,7 +43,7 @@ export function drawCubeSideCycle(state: State, cubeSide: ECubeSide): void {
   ctx.lineWidth = 1;
   ctx.stroke();
 
-  // snake drawer
+  // draw snake
   ctx.fillStyle = 'red';
   snake.parts.forEach((part) => {
     if (part.pos.cubeSide === cubeSide) {
@@ -55,7 +56,7 @@ export function drawCubeSideCycle(state: State, cubeSide: ECubeSide): void {
     }
   });
 
-  // side label
+  // draw side label
   const cubeSideLabel = getCubeSideLabel(cubeSide);
   ctx.fillText(cubeSideLabel, 5, 15);
   ctx.fillText(cubeSideLabel, width - 30, 15);

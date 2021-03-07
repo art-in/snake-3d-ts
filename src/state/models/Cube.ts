@@ -1,7 +1,28 @@
+import {makeAutoObservable} from 'mobx';
 import CubeSide from './CubeSide';
 import {ECubeSide} from './ECubeSide';
+import IGrid from './IGrid';
+import IModelRotation from './IModelRotation';
 
 export default class Cube {
+  program?: WebGLProgram;
+  snakePartProgram?: WebGLProgram;
+  vertexCoordsBuffer?: WebGLBuffer;
+  textureCoordsBuffer?: WebGLBuffer;
+
+  textures?: WebGLTexture[];
+
+  targetRotation: IModelRotation = {x: 0, y: 0};
+  currentRotation: IModelRotation = {x: 0, y: 0};
+
+  isDragging?: boolean;
+  clientX?: number;
+  clientY?: number;
+
+  needsRedraw = true;
+
+  grid: IGrid = {rowsCount: 16, colsCount: 16};
+
   sides: CubeSide[] = [];
 
   [ECubeSide.Front]: CubeSide;
@@ -12,6 +33,8 @@ export default class Cube {
   [ECubeSide.Right]: CubeSide;
 
   constructor() {
+    makeAutoObservable(this);
+
     const front = new CubeSide(ECubeSide.Front);
     const back = new CubeSide(ECubeSide.Back);
     const up = new CubeSide(ECubeSide.Up);

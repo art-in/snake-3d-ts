@@ -1,4 +1,4 @@
-export default interface IPosition3D {
+export default interface IPoint3D {
   x: number;
   y: number;
   z: number;

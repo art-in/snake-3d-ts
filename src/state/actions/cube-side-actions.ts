@@ -1,7 +1,5 @@
 import assertNotEmpty from '../../helpers/assertNotEmpty';
-import resizeCanvas from '../../helpers/resizeCanvas';
 import {ECubeSide} from '../models/ECubeSide';
-import ISize from '../models/ISize';
 import State from '../models/State';
 
 export function initCubeSideState(state: State, side: ECubeSide): void {

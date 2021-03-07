@@ -1,19 +1,28 @@
+import {action} from 'mobx';
 import clone from '../../helpers/clone';
+import getOppositeDirection from '../../helpers/getOppositeDirection';
 import normalizeDegrees from '../../helpers/normalize-degrees';
-import {
-  changeSnakeDirection,
-  moveSnake,
-} from '../../state/actions/snake-actions';
+import {setSnakeDirection, moveSnake} from '../../state/actions/snake-actions';
 import {ECubeSide} from '../../state/models/ECubeSide';
 import {EDirection} from '../../state/models/EDirection';
 import State from '../../state/models/State';
 
-export function handleControlEvents(state: State, window: Window): void {
-  window.addEventListener('keydown', (event) => onKeyDown(state, event));
-  window.addEventListener('mousedown', () => onWindowMouseDown(state));
-  window.addEventListener('mouseup', () => onWindowMouseUp(state));
-  window.addEventListener('mousemove', (event) =>
-    onWindowMouseMove(state, event)
+export function subscribeToControlEvents(state: State, window: Window): void {
+  window.addEventListener(
+    'keydown',
+    action((event) => onKeyDown(state, event))
+  );
+  window.addEventListener(
+    'mousedown',
+    action(() => onMouseDown(state))
+  );
+  window.addEventListener(
+    'mouseup',
+    action(() => onMouseUp(state))
+  );
+  window.addEventListener(
+    'mousemove',
+    action((event) => onMouseMove(state, event))
   );
 }
 
@@ -40,8 +49,10 @@ function onKeyDown(state: State, event: KeyboardEvent) {
   }
 
   if (direction !== undefined) {
-    const headPos = state.scene.snake.parts[0].pos;
-    const grid = state.scene.grid;
+    const headPos = state.snake.parts[0].pos;
+    const grid = state.scene.cube.grid;
+
+    // adjust direction per current camera rotation
     if (
       (headPos.cubeSide === ECubeSide.Up &&
         headPos.gridRow >= grid.rowsCount / 2) ||
@@ -51,64 +62,51 @@ function onKeyDown(state: State, event: KeyboardEvent) {
       direction = getOppositeDirection(direction);
     }
 
-    changeSnakeDirection(state, direction);
+    setSnakeDirection(state, direction);
     moveSnake(state);
   }
 }
 
-function getOppositeDirection(direction: EDirection): EDirection {
-  switch (direction) {
-    case EDirection.Up:
-      return EDirection.Down;
-    case EDirection.Down:
-      return EDirection.Up;
-    case EDirection.Left:
-      return EDirection.Right;
-    case EDirection.Right:
-      return EDirection.Left;
-  }
+export function onMouseDown(state: State): void {
+  state.scene.cube.isDragging = true;
 }
 
-export function onWindowMouseDown(state: State): void {
-  state.scene.isDragging = true;
+export function onMouseUp(state: State): void {
+  const {cube} = state.scene;
+
+  cube.isDragging = false;
+  cube.clientX = undefined;
+  cube.clientY = undefined;
 }
 
-export function onWindowMouseUp(state: State): void {
-  const {scene} = state;
+export function onMouseMove(state: State, e: MouseEvent): void {
+  const {cube} = state.scene;
 
-  scene.isDragging = false;
-  scene.clientX = undefined;
-  scene.clientY = undefined;
-}
-
-export function onWindowMouseMove(state: State, e: MouseEvent): void {
-  const {scene} = state;
-
-  if (!scene.isDragging) {
+  if (!cube.isDragging) {
     return;
   }
 
   if (e.which === 0) {
     // mouse button was released outside browser window
-    onWindowMouseUp(state);
+    onMouseUp(state);
     return;
   }
 
-  if (scene.clientX !== undefined && scene.clientY !== undefined) {
-    const dx = scene.clientX - e.clientX;
-    const dy = scene.clientY - e.clientY;
+  if (cube.clientX !== undefined && cube.clientY !== undefined) {
+    const dx = cube.clientX - e.clientX;
+    const dy = cube.clientY - e.clientY;
 
-    scene.targetRotationDeg.x -= Math.round(dy * 0.5);
-    scene.targetRotationDeg.y -= Math.round(dx * 0.5);
+    cube.targetRotation.x -= dy * 0.25;
+    cube.targetRotation.y -= dx * 0.25;
 
-    scene.targetRotationDeg.x = normalizeDegrees(scene.targetRotationDeg.x);
-    scene.targetRotationDeg.y = normalizeDegrees(scene.targetRotationDeg.y);
+    cube.targetRotation.x = normalizeDegrees(cube.targetRotation.x);
+    cube.targetRotation.y = normalizeDegrees(cube.targetRotation.y);
 
-    scene.currentRotationDeg = clone(scene.targetRotationDeg);
+    cube.currentRotation = clone(cube.targetRotation);
 
-    scene.needsRedraw = true;
+    cube.needsRedraw = true;
   }
 
-  scene.clientX = e.clientX;
-  scene.clientY = e.clientY;
+  cube.clientX = e.clientX;
+  cube.clientY = e.clientY;
 }

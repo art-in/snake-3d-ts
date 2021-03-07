@@ -1,49 +1,17 @@
-import {ECubeSide} from '../models/ECubeSide';
-import Grid from '../models/Grid';
-import {ICubePosition} from '../models/IGridPosition';
-import IPosition3D from '../models/IPosition3D';
+import {cubeSidePosition3dMatrix} from '../drawers/cube-drawer/geometry/cube-side-position-3d-matrix';
+import {ECubeSide} from '../state/models/ECubeSide';
+import IGrid from '../state/models/IGrid';
+import {ICubePosition} from '../state/models/IGridPosition';
+import IPoint3D from '../state/models/IPoint3D';
 
-const cubeSidePositionMatrix = {
-  [ECubeSide.Front]: {
-    x: [-0.5, 0.5],
-    y: [-0.5, 0.5],
-    z: [0.5, 0.5],
-  },
-  [ECubeSide.Left]: {
-    x: [-0.5, -0.5],
-    y: [-0.5, 0.5],
-    z: [-0.5, 0.5],
-  },
-  [ECubeSide.Right]: {
-    x: [0.5, 0.5],
-    y: [-0.5, 0.5],
-    z: [0.5, -0.5],
-  },
-  [ECubeSide.Back]: {
-    x: [0.5, -0.5],
-    y: [-0.5, 0.5],
-    z: [-0.5, -0.5],
-  },
-  [ECubeSide.Up]: {
-    x: [-0.5, 0.5],
-    y: [0.5, 0.5],
-    z: [0.5, -0.5],
-  },
-  [ECubeSide.Down]: {
-    x: [-0.5, 0.5],
-    y: [-0.5, -0.5],
-    z: [-0.5, 0.5],
-  },
-};
-
-export function getPosition3dForCubePosition(
+export default function getPosition3dForCubePosition(
   pos: ICubePosition,
-  grid: Grid
-): IPosition3D {
+  grid: IGrid
+): IPoint3D {
   const vertRatio = (pos.gridRow + 0.5) / grid.rowsCount;
   const horizRatio = (pos.gridCol + 0.5) / grid.colsCount;
 
-  const ranges = cubeSidePositionMatrix[pos.cubeSide];
+  const ranges = cubeSidePosition3dMatrix[pos.cubeSide];
 
   const dx = ranges.x[1] - ranges.x[0];
   const dy = ranges.y[1] - ranges.y[0];

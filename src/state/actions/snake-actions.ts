@@ -1,16 +1,16 @@
 import State from '../models/State';
 import Snake, {SnakePart} from '../models/Snake';
-import Grid from '../models/Grid';
+import IGrid from '../models/IGrid';
 import assertNotEmpty from '../../helpers/assertNotEmpty';
 import {EDirection} from '../models/EDirection';
 import clone from '../../helpers/clone';
 import {ECubeSide} from '../models/ECubeSide';
-import getModelRotationForCubePosition from './get-model-rotation-for-cube-position';
+import getModelRotationForCubePosition from '../../helpers/get-model-rotation-for-cube-position';
 
 const SNAKE_MOVE_PERIOD = 100; // ms
 
 export function moveSnakeCycle(state: State): void {
-  const {snake} = state.scene;
+  const {snake} = state;
   if (
     snake.lastMoveTime === undefined ||
     performance.now() - snake.lastMoveTime >= SNAKE_MOVE_PERIOD
@@ -21,7 +21,8 @@ export function moveSnakeCycle(state: State): void {
 }
 
 export function moveSnake(state: State): void {
-  const {grid, snake} = state.scene;
+  const {scene, snake} = state;
+  const {grid} = scene.cube;
 
   const head = snake.parts[0];
   const tail = snake.parts.pop();
@@ -54,15 +55,15 @@ export function moveSnake(state: State): void {
 
   checkForApple(state);
 
-  state.scene.targetRotationDeg = getModelRotationForCubePosition(
+  state.scene.cube.targetRotation = getModelRotationForCubePosition(
     snake.parts[0].pos,
-    state.scene.grid
+    state.scene.cube.grid
   );
   state.scene.cube[head.pos.cubeSide].needsRedraw = true;
   state.scene.cube[tail.pos.cubeSide].needsRedraw = true;
 }
 
-function ensureSideBounds(grid: Grid, snake: Snake): void {
+function ensureSideBounds(grid: IGrid, snake: Snake): void {
   assertNotEmpty(grid.rowsCount);
   assertNotEmpty(grid.colsCount);
 
@@ -214,15 +215,12 @@ function ensureSideBounds(grid: Grid, snake: Snake): void {
   }
 }
 
-export function changeSnakeDirection(
-  state: State,
-  direction: EDirection
-): void {
-  state.scene.snake.direction = direction;
+export function setSnakeDirection(state: State, direction: EDirection): void {
+  state.snake.direction = direction;
 }
 
 export function checkForApple(state: State): void {
-  const {snake, apples} = state.scene;
+  const {snake, apples} = state;
 
   const head = snake.parts[0];
   const tail = snake.parts[snake.parts.length - 1];

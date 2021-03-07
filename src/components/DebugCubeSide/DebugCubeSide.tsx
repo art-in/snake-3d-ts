@@ -1,16 +1,16 @@
 import React, {useEffect, useRef} from 'react';
 import cn from 'classnames';
 import assertNotEmpty from '../../helpers/assertNotEmpty';
-import State from '../../state/models/State';
-import classes from './CubeSide.css';
 import {ECubeSide} from '../../state/models/ECubeSide';
+import State from '../../state/models/State';
+import classes from './DebugCubeSide.css';
 
 interface ICubeSideProps {
   state: State;
   side: ECubeSide;
 }
 
-export default function CubeSide(props: ICubeSideProps): JSX.Element {
+export default function DebugCubeSide(props: ICubeSideProps): JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const cubeSide = props.state.scene.cube[props.side];
@@ -30,5 +30,5 @@ export default function CubeSide(props: ICubeSideProps): JSX.Element {
     [classes.back]: props.side === ECubeSide.Back,
   });
 
-  return <div className={classNames} ref={containerRef}></div>;
+  return <div className={classNames} ref={containerRef} />;
 }

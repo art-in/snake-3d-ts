@@ -74,3 +74,26 @@ export function getAttributeLocation(
   }
   return loc;
 }
+
+export interface VertexAttributePointerParams {
+  location: number; // location of target attribute
+  size: number; // number of items per iteration
+  type: number; // data type of each item
+  normalize: boolean;
+  stride: number; // number of bytes per iteration
+  offset: number; // number of bytes to skip per iteration
+}
+
+export function vertexAttributePointer(
+  ctx: WebGLRenderingContext,
+  params: VertexAttributePointerParams
+): void {
+  return ctx.vertexAttribPointer(
+    params.location,
+    params.size,
+    params.type,
+    params.normalize,
+    params.stride,
+    params.offset
+  );
+}

@@ -1,4 +1,4 @@
-import assertNotEmpty from '../../helpers/assertNotEmpty';
+import assertNotEmpty from '../../helpers/assert-not-empty';
 import {ECubeSide} from '../models/ECubeSide';
 import State from '../models/State';
 

@@ -1,12 +1,12 @@
+import {action} from 'mobx';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import * as sceneActions from '../../state/actions/scene-actions';
+import * as gameActions from '../../state/actions/game-actions';
 import * as sceneDrawer from '../../drawers/scene-drawer';
 import ISize from '../../state/models/ISize';
-import assertNotEmpty from '../../helpers/assertNotEmpty';
+import assertNotEmpty from '../../helpers/assert-not-empty';
 import State from '../../state/models/State';
+import resizeCanvas from '../../helpers/resize-canvas';
 import {subscribeToControlEvents} from './events-manager';
-import resizeCanvas from '../../helpers/resizeCanvas';
-import {action} from 'mobx';
 
 interface ISceneProps {
   state: State;
@@ -18,14 +18,15 @@ export default function Scene({state}: ISceneProps): JSX.Element {
 
   const init = useCallback(() => {
     if (isInitialized) {
-      // refresh entire page instead of hot reload
+      // refresh entire page instead of hot reload, to correctly redraw
+      // cube sides
       location.reload();
     }
 
     assertNotEmpty(canvasRef.current, 'Failed to get canvas element');
     const canvas = canvasRef.current;
 
-    sceneActions.initSceneState(state, canvas);
+    gameActions.initGameState(state, canvas);
     sceneDrawer.initSceneDrawer(state);
 
     setIsInitialized(true);
@@ -51,7 +52,7 @@ export default function Scene({state}: ISceneProps): JSX.Element {
 
   const renderCycle = useCallback(
     action(() => {
-      sceneActions.updateSceneCycle(state);
+      gameActions.updateGameStateCycle(state);
       sceneDrawer.drawSceneCycle(state);
 
       requestAnimationFrame(renderCycle);

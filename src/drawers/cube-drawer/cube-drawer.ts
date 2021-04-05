@@ -7,17 +7,14 @@ import {
 } from '../../helpers/webgl';
 import * as m4 from '../../helpers/m4';
 import {IShaderDescriptor} from '../../helpers/webgl.types';
-import assertNotEmpty from '../../helpers/assertNotEmpty';
+import assertNotEmpty from '../../helpers/assert-not-empty';
 import Cube from '../../state/models/Cube';
 import {ECubeSide} from '../../state/models/ECubeSide';
-import getPosition3dForCubePosition from '../../helpers/get-position-3d-for-cube-position';
-import {degToRad} from '../../helpers/degToRad';
+import {degToRad} from '../../helpers/deg-to-rad';
 import {cubeVertexCoords} from './geometry/cube-vertex-coords';
 import {cubeTextureCoords} from './geometry/cube-texture-coords';
-import cubeVertexShader from './shaders/cube/vertex.glsl';
-import cubeFragmentShader from './shaders/cube/fragment.glsl';
-import snakePartVertexShader from './shaders/snake-part/vertex.glsl';
-import snakePartFragmentShader from './shaders/snake-part/fragment.glsl';
+import cubeVertexShader from './shaders/vertex.glsl';
+import cubeFragmentShader from './shaders/fragment.glsl';
 
 const FIELD_OF_VIEW_RAD = degToRad(60);
 
@@ -34,14 +31,6 @@ export function initCubeDrawer(state: State): void {
   ];
 
   cube.program = createProgram(ctx, shaderDescriptors);
-
-  // compile GLSL shaders for snake part
-  const snakePartShaderDescriptors: IShaderDescriptor[] = [
-    {src: snakePartVertexShader, type: ctx.VERTEX_SHADER},
-    {src: snakePartFragmentShader, type: ctx.FRAGMENT_SHADER},
-  ];
-
-  cube.snakePartProgram = createProgram(ctx, snakePartShaderDescriptors);
 
   ctx.useProgram(cube.program);
 
@@ -142,7 +131,6 @@ export function drawCubeCycle(state: State): void {
   matrix = m4.yRotate(matrix, degToRad(cube.currentRotation.y));
 
   drawCube(state, matrix);
-  drawSnakePart(state, matrix);
 
   cube.needsRedraw = false;
 }
@@ -246,81 +234,6 @@ function drawCube(state: State, matrix: m4.TMatrix4) {
 
   // pass transformation matrix
   const matrixLocation = getUniformLocation(ctx, cube.program, 'u_matrix');
-  ctx.uniformMatrix4fv(matrixLocation, false, matrix);
-
-  // draw the geometry
-  const cubeSidesCount = 6;
-  const trianglesPerCubeSideCount = 2;
-  const verticesPerTriangleCount = 3;
-  const totalVerticesCount =
-    cubeSidesCount * trianglesPerCubeSideCount * verticesPerTriangleCount;
-
-  ctx.drawArrays(ctx.TRIANGLES, 0, totalVerticesCount);
-}
-
-function drawSnakePart(state: State, matrix: m4.TMatrix4) {
-  const {ctx, canvas, cube} = state.scene;
-
-  assertNotEmpty(ctx);
-  assertNotEmpty(canvas);
-  assertNotEmpty(cube.snakePartProgram);
-  assertNotEmpty(cube.textures);
-  assertNotEmpty(cube.vertexCoordsBuffer);
-  assertNotEmpty(cube.textureCoordsBuffer);
-
-  ctx.useProgram(cube.snakePartProgram);
-
-  // define how to extract coordinates from vertex buffer
-  const cubeVertexCoordLocation = getAttributeLocation(
-    ctx,
-    cube.snakePartProgram,
-    'a_cube_vertex_coord'
-  );
-
-  ctx.enableVertexAttribArray(cubeVertexCoordLocation);
-  ctx.bindBuffer(ctx.ARRAY_BUFFER, cube.vertexCoordsBuffer);
-
-  vertexAttributePointer(ctx, {
-    location: cubeVertexCoordLocation,
-    size: 3,
-    type: ctx.FLOAT,
-    normalize: false,
-    stride: 16, // (bytes) each vertex consists of 4 x 4-byte floats (side, x, y, z)
-    offset: 4, // (bytes) skip side float
-  });
-
-  // define how to extract cube side from vertex buffer
-  const cubeVertexSideLocation = getAttributeLocation(
-    ctx,
-    cube.snakePartProgram,
-    'a_cube_vertex_side'
-  );
-
-  ctx.enableVertexAttribArray(cubeVertexSideLocation);
-  ctx.bindBuffer(ctx.ARRAY_BUFFER, cube.vertexCoordsBuffer);
-
-  vertexAttributePointer(ctx, {
-    location: cubeVertexSideLocation,
-    size: 1,
-    type: ctx.FLOAT,
-    normalize: false,
-    stride: 16, // (bytes) each vertex consists of 4 x 4-byte floats (side, x, y, z)
-    offset: 0, // (bytes) start at the beginning of the buffer
-  });
-
-  // pass transformation matrix
-  const matrixLocation = getUniformLocation(
-    ctx,
-    cube.snakePartProgram,
-    'u_matrix'
-  );
-  const pos = getPosition3dForCubePosition(
-    state.snake.parts[0].pos,
-    state.scene.cube.grid
-  );
-  matrix = m4.translate(matrix, pos.x, pos.y, pos.z);
-  const scaleFactor = 1 / 16 - (1 / 16) * 0.1;
-  matrix = m4.scale(matrix, scaleFactor, scaleFactor, scaleFactor);
   ctx.uniformMatrix4fv(matrixLocation, false, matrix);
 
   // draw the geometry

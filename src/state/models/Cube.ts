@@ -1,5 +1,6 @@
 import {makeAutoObservable} from 'mobx';
 import CubeSide from './CubeSide';
+import ECameraMode from './ECameraMode';
 import {ECubeSide} from './ECubeSide';
 import IGrid from './IGrid';
 import IModelRotation from './IModelRotation';
@@ -14,6 +15,7 @@ export default class Cube {
 
   targetRotation: IModelRotation = {x: 0, y: 0};
   currentRotation: IModelRotation = {x: 0, y: 0};
+  cameraMode: ECameraMode = ECameraMode.Overview;
 
   isDragging?: boolean;
   clientX?: number;

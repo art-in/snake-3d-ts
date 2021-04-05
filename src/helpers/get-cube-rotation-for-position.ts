@@ -1,12 +1,12 @@
 import {ICubePosition} from '../state/models/IGridPosition';
 import IModelRotation from '../state/models/IModelRotation';
+import IGrid from '../state/models/IGrid';
 import getPosition3dForCubePosition from './get-position-3d-for-cube-position';
 import getAngleBetweenVectors from './get-angle-between-vectors';
 import normalizeDegrees from './normalize-degrees';
-import {radToDeg} from './radToDeg';
-import IGrid from '../state/models/IGrid';
+import {radToDeg} from './rad-to-deg';
 
-export default function getModelRotationForCubePosition(
+export default function getCubeRotationForPosition(
   pos: ICubePosition,
   grid: IGrid
 ): IModelRotation {

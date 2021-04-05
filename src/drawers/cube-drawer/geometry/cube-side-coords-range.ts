@@ -1,6 +1,6 @@
 import {ECubeSide} from '../../../state/models/ECubeSide';
 
-export const cubeSidePosition3dMatrix = {
+export const cudeSideCoordsRange = {
   [ECubeSide.Front]: {
     x: [-0.5, 0.5],
     y: [-0.5, 0.5],

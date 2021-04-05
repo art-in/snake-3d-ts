@@ -1,4 +1,4 @@
-import assertNotEmpty from '../../helpers/assertNotEmpty';
+import assertNotEmpty from '../../helpers/assert-not-empty';
 import State from '../models/State';
 import * as cubeActions from './cube-actions';
 import * as cubeSideActions from './cube-side-actions';
@@ -19,5 +19,4 @@ export function initSceneState(state: State, canvas: HTMLCanvasElement): void {
 
 export function updateSceneCycle(state: State): void {
   cubeActions.autoRotateCycle(state);
-  // snakeActions.moveSnakeCycle(state);
 }

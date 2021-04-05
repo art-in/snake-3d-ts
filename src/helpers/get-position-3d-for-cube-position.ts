@@ -1,4 +1,4 @@
-import {cubeSidePosition3dMatrix} from '../drawers/cube-drawer/geometry/cube-side-position-3d-matrix';
+import {cudeSideCoordsRange} from '../drawers/cube-drawer/geometry/cube-side-coords-range';
 import {ECubeSide} from '../state/models/ECubeSide';
 import IGrid from '../state/models/IGrid';
 import {ICubePosition} from '../state/models/IGridPosition';
@@ -11,7 +11,7 @@ export default function getPosition3dForCubePosition(
   const vertRatio = (pos.gridRow + 0.5) / grid.rowsCount;
   const horizRatio = (pos.gridCol + 0.5) / grid.colsCount;
 
-  const ranges = cubeSidePosition3dMatrix[pos.cubeSide];
+  const ranges = cudeSideCoordsRange[pos.cubeSide];
 
   const dx = ranges.x[1] - ranges.x[0];
   const dy = ranges.y[1] - ranges.y[0];

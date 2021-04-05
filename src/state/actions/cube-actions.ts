@@ -1,5 +1,7 @@
+import getCubeRotationForPosition from '../../helpers/get-cube-rotation-for-position';
 import normalizeDegrees from '../../helpers/normalize-degrees';
-import projectToRange from '../../helpers/projectToRange';
+import projectToRange from '../../helpers/project-to-range';
+import ECameraMode from '../models/ECameraMode';
 import State from '../models/State';
 
 const AUTO_ROTATION_STEP_MIN = 0.5;
@@ -16,12 +18,16 @@ export function autoRotateCycle(state: State): void {
 
   const {currentRotation, targetRotation} = scene.cube;
 
-  if (currentRotation.x !== targetRotation.x) {
-    currentRotation.x = makeRotationStep(currentRotation.x, targetRotation.x);
+  if (cube.cameraMode === ECameraMode.Overview) {
+    targetRotation.y = normalizeDegrees(targetRotation.y - 0.3);
   }
 
-  if (currentRotation.y !== targetRotation.y) {
-    currentRotation.y = makeRotationStep(currentRotation.y, targetRotation.y);
+  if (cube.cameraMode === ECameraMode.FollowSnake) {
+    const head = state.snake.parts[0];
+    state.scene.cube.targetRotation = getCubeRotationForPosition(
+      head.pos,
+      state.scene.cube.grid
+    );
   }
 
   if (
@@ -30,20 +36,25 @@ export function autoRotateCycle(state: State): void {
   ) {
     cube.needsRedraw = true;
   }
+
+  if (currentRotation.x !== targetRotation.x) {
+    currentRotation.x = makeRotationStep(currentRotation.x, targetRotation.x);
+  }
+
+  if (currentRotation.y !== targetRotation.y) {
+    currentRotation.y = makeRotationStep(currentRotation.y, targetRotation.y);
+  }
 }
 
-function makeRotationStep(
-  currentRotation: number,
-  targetRotation: number
-): number {
+function makeRotationStep(currentAngle: number, targetAngle: number): number {
   const angleDiff = Math.min(
-    Math.abs(currentRotation - targetRotation),
-    Math.abs(currentRotation - targetRotation - 360),
-    Math.abs(currentRotation - targetRotation + 360)
+    Math.abs(currentAngle - targetAngle),
+    Math.abs(currentAngle - targetAngle - 360),
+    Math.abs(currentAngle - targetAngle + 360)
   );
 
   if (angleDiff < AUTO_ROTATION_STEP_MIN) {
-    return targetRotation;
+    return targetAngle;
   } else {
     const rotationStep = projectToRange(
       angleDiff,
@@ -51,8 +62,8 @@ function makeRotationStep(
       AUTO_ROTATION_STEP_RANGE
     );
     const nextCurrentRotation =
-      currentRotation +
-      rotationStep * getRotationDirection(currentRotation, targetRotation);
+      currentAngle +
+      rotationStep * getRotationDirection(currentAngle, targetAngle);
     return normalizeDegrees(nextCurrentRotation);
   }
 }

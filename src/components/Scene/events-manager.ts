@@ -1,10 +1,13 @@
 import {action} from 'mobx';
 import clone from '../../helpers/clone';
-import getOppositeDirection from '../../helpers/getOppositeDirection';
+import getOppositeDirection from '../../helpers/get-opposite-direction';
 import normalizeDegrees from '../../helpers/normalize-degrees';
-import {setSnakeDirection, moveSnake} from '../../state/actions/snake-actions';
+import {startOrPauseGame} from '../../state/actions/game-actions';
+import {setSnakeDirection} from '../../state/actions/snake-actions';
+import ECameraMode from '../../state/models/ECameraMode';
 import {ECubeSide} from '../../state/models/ECubeSide';
 import {EDirection} from '../../state/models/EDirection';
+import EGameStatus from '../../state/models/EGameStatus';
 import State from '../../state/models/State';
 
 export function subscribeToControlEvents(state: State, window: Window): void {
@@ -46,6 +49,10 @@ function onKeyDown(state: State, event: KeyboardEvent) {
     case 'KeyD':
       direction = EDirection.Right;
       break;
+    case 'Space':
+    case 'Enter':
+      startOrPauseGame(state);
+      break;
   }
 
   if (direction !== undefined) {
@@ -63,12 +70,14 @@ function onKeyDown(state: State, event: KeyboardEvent) {
     }
 
     setSnakeDirection(state, direction);
-    moveSnake(state);
   }
 }
 
 export function onMouseDown(state: State): void {
-  state.scene.cube.isDragging = true;
+  if (state.status !== EGameStatus.InGame) {
+    state.scene.cube.isDragging = true;
+    state.scene.cube.cameraMode = ECameraMode.ManualControl;
+  }
 }
 
 export function onMouseUp(state: State): void {

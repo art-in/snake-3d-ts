@@ -1,4 +1,4 @@
-import {ECubeSide} from '../../../state/models/ECubeSide';
+import ECubeSide from '../../../state/models/ECubeSide';
 
 // (side, x, y, z)
 // prettier-ignore

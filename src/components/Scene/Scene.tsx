@@ -4,12 +4,12 @@ import * as gameActions from '../../state/actions/game-actions';
 import * as sceneDrawer from '../../drawers/scene-drawer';
 import ISize from '../../state/models/ISize';
 import assertNotEmpty from '../../helpers/assert-not-empty';
-import State from '../../state/models/State';
+import GameState from '../../state/models/GameState';
 import resizeCanvas from '../../helpers/resize-canvas';
-import {subscribeToControlEvents} from './events-manager';
+import {subscribeToControlEvents} from './control-events';
 
 interface ISceneProps {
-  state: State;
+  state: GameState;
 }
 
 export default function Scene({state}: ISceneProps): JSX.Element {
@@ -26,8 +26,8 @@ export default function Scene({state}: ISceneProps): JSX.Element {
     assertNotEmpty(canvasRef.current, 'Failed to get canvas element');
     const canvas = canvasRef.current;
 
-    gameActions.initGameState(state, canvas);
-    sceneDrawer.initSceneDrawer(state);
+    gameActions.initGameState(state);
+    sceneDrawer.initSceneDrawer(state, canvas);
 
     setIsInitialized(true);
   }, []);

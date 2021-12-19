@@ -1,13 +1,12 @@
 import {makeAutoObservable} from 'mobx';
 import CubeSide from './CubeSide';
 import ECameraMode from './ECameraMode';
-import {ECubeSide} from './ECubeSide';
+import ECubeSide from './ECubeSide';
 import IGrid from './IGrid';
 import IModelRotation from './IModelRotation';
 
 export default class Cube {
   program?: WebGLProgram;
-  snakePartProgram?: WebGLProgram;
   vertexCoordsBuffer?: WebGLBuffer;
   textureCoordsBuffer?: WebGLBuffer;
 
@@ -18,8 +17,8 @@ export default class Cube {
   cameraMode: ECameraMode = ECameraMode.Overview;
 
   isDragging?: boolean;
-  clientX?: number;
-  clientY?: number;
+  pointerPosX?: number;
+  pointerPosY?: number;
 
   needsRedraw = true;
 

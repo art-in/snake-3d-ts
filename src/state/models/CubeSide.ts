@@ -1,14 +1,15 @@
-import {ECubeSide} from './ECubeSide';
+import ECubeSide from './ECubeSide';
+
 export default class CubeSide {
   canvas?: HTMLCanvasElement;
   ctx?: CanvasRenderingContext2D;
 
-  side: ECubeSide;
+  type: ECubeSide;
 
   needsRedraw = true;
   needsUpdateOnCube = true;
 
   constructor(side: ECubeSide) {
-    this.side = side;
+    this.type = side;
   }
 }

@@ -2,13 +2,28 @@ import assertNotEmpty from '../helpers/assert-not-empty';
 import getCanvasFontString from '../helpers/get-canvas-font-string';
 import getCubeSideLabel from '../helpers/get-cube-side-label';
 import measureCanvasText from '../helpers/measure-canvas-text';
-import {ECubeSide} from '../state/models/ECubeSide';
+import ECubeSide from '../state/models/ECubeSide';
 import EGameStatus from '../state/models/EGameStatus';
-import State from '../state/models/State';
+import GameState from '../state/models/GameState';
 
 const DRAW_SIDE_LABELS = false;
 
-export function drawCubeSideCycle(state: State, cubeSide: ECubeSide): void {
+export function initCubeSideDrawer(state: GameState, side: ECubeSide): void {
+  const canvas = document.createElement('canvas');
+
+  canvas.width = 2 ** 9;
+  canvas.height = 2 ** 9;
+
+  const ctx = canvas.getContext('2d');
+  assertNotEmpty(ctx);
+
+  state.scene.cube.sides[side].canvas = canvas;
+  state.scene.cube.sides[side].ctx = ctx;
+  state.scene.cube.sides[side].needsRedraw = true;
+  state.scene.cube.sides[side].needsUpdateOnCube = true;
+}
+
+export function drawCubeSideCycle(state: GameState, cubeSide: ECubeSide): void {
   const {scene, snake, apples, stones} = state;
   const {grid} = scene.cube;
 
@@ -52,10 +67,10 @@ export function drawCubeSideCycle(state: State, cubeSide: ECubeSide): void {
   // draw snake
   ctx.fillStyle = 'red';
   snake.parts.forEach((part) => {
-    if (part.pos.cubeSide === cubeSide) {
+    if (part.side === cubeSide) {
       ctx.fillRect(
-        part.pos.gridCol * cellWidth,
-        height - part.pos.gridRow * cellHeight - cellHeight,
+        part.col * cellWidth,
+        height - part.row * cellHeight - cellHeight,
         cellWidth,
         cellHeight
       );
@@ -65,10 +80,10 @@ export function drawCubeSideCycle(state: State, cubeSide: ECubeSide): void {
   // draw apples
   ctx.fillStyle = 'green';
   apples.forEach((apple) => {
-    if (apple.pos.cubeSide === cubeSide) {
+    if (apple.side === cubeSide) {
       ctx.fillRect(
-        apple.pos.gridCol * cellWidth,
-        height - apple.pos.gridRow * cellHeight - cellHeight,
+        apple.col * cellWidth,
+        height - apple.row * cellHeight - cellHeight,
         cellWidth,
         cellHeight
       );
@@ -78,10 +93,10 @@ export function drawCubeSideCycle(state: State, cubeSide: ECubeSide): void {
   // draw stones
   ctx.fillStyle = 'black';
   stones.forEach((apple) => {
-    if (apple.pos.cubeSide === cubeSide) {
+    if (apple.side === cubeSide) {
       ctx.fillRect(
-        apple.pos.gridCol * cellWidth,
-        height - apple.pos.gridRow * cellHeight - cellHeight,
+        apple.col * cellWidth,
+        height - apple.row * cellHeight - cellHeight,
         cellWidth,
         cellHeight
       );
@@ -136,6 +151,7 @@ export function drawCubeSideCycle(state: State, cubeSide: ECubeSide): void {
         : state.status === EGameStatus.Fail
         ? 'FAIL'
         : 'SNAKE 3D';
+
     const headerSize = measureCanvasText(ctx, title);
     ctx.fillText(
       title,

@@ -1,4 +1,4 @@
-import {ICubePosition} from '../state/models/IGridPosition';
+import ICubePosition from '../state/models/ICubePosition';
 import IModelRotation from '../state/models/IModelRotation';
 import IGrid from '../state/models/IGrid';
 import getPosition3dForCubePosition from './get-position-3d-for-cube-position';

@@ -1,4 +1,4 @@
-export enum ECubeSide {
+enum ECubeSide {
   Front = 0,
   Back = 1,
   Up = 2,
@@ -6,3 +6,5 @@ export enum ECubeSide {
   Left = 4,
   Right = 5,
 }
+
+export default ECubeSide;

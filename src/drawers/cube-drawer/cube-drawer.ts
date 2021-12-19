@@ -1,4 +1,4 @@
-import State from '../../state/models/State';
+import GameState from '../../state/models/GameState';
 import {
   createProgram,
   getAttributeLocation,
@@ -9,7 +9,7 @@ import * as m4 from '../../helpers/m4';
 import {IShaderDescriptor} from '../../helpers/webgl.types';
 import assertNotEmpty from '../../helpers/assert-not-empty';
 import Cube from '../../state/models/Cube';
-import {ECubeSide} from '../../state/models/ECubeSide';
+import ECubeSide from '../../state/models/ECubeSide';
 import {degToRad} from '../../helpers/deg-to-rad';
 import {cubeVertexCoords} from './geometry/cube-vertex-coords';
 import {cubeTextureCoords} from './geometry/cube-texture-coords';
@@ -18,11 +18,15 @@ import cubeFragmentShader from './shaders/fragment.glsl';
 
 const FIELD_OF_VIEW_RAD = degToRad(60);
 
-export function initCubeDrawer(state: State): void {
+export function initCubeDrawer(state: GameState): void {
   const {scene} = state;
+  assertNotEmpty(scene.canvas);
 
-  const {ctx, cube} = scene;
-  assertNotEmpty(ctx);
+  const ctx = scene.canvas.getContext('webgl');
+  assertNotEmpty(ctx, 'Failed to get webgl context');
+  state.scene.ctx = ctx;
+
+  const {cube} = scene;
 
   // compile GLSL shaders for cube
   const shaderDescriptors: IShaderDescriptor[] = [
@@ -70,7 +74,7 @@ export function initCubeDrawer(state: State): void {
     const canvas = side.canvas;
     assertNotEmpty(canvas);
 
-    ctx.bindTexture(ctx.TEXTURE_2D, cubeTextures[side.side]);
+    ctx.bindTexture(ctx.TEXTURE_2D, cubeTextures[side.type]);
     ctx.texImage2D(
       ctx.TEXTURE_2D,
       0,
@@ -92,7 +96,7 @@ function shouldRedrawCube(cube: Cube) {
   return cube.needsRedraw || cube.sides.some((s) => s.needsUpdateOnCube);
 }
 
-export function drawCubeCycle(state: State): void {
+export function drawCubeCycle(state: GameState): void {
   const {scene} = state;
   const {canvas, ctx, cube} = scene;
 
@@ -135,7 +139,7 @@ export function drawCubeCycle(state: State): void {
   cube.needsRedraw = false;
 }
 
-function drawCube(state: State, matrix: m4.TMatrix4) {
+function drawCube(state: GameState, matrix: m4.TMatrix4) {
   const {ctx, canvas, cube} = state.scene;
 
   assertNotEmpty(ctx);
@@ -207,11 +211,10 @@ function drawCube(state: State, matrix: m4.TMatrix4) {
   // update texture data if needed
   state.scene.cube.sides.forEach((side) => {
     if (side.needsUpdateOnCube) {
-      const canvas = side.canvas;
-      assertNotEmpty(canvas);
+      assertNotEmpty(side.canvas);
       assertNotEmpty(cube.textures);
 
-      ctx.bindTexture(ctx.TEXTURE_2D, cube.textures[side.side]);
+      ctx.bindTexture(ctx.TEXTURE_2D, cube.textures[side.type]);
       ctx.texSubImage2D(
         ctx.TEXTURE_2D,
         0, // level
@@ -219,7 +222,7 @@ function drawCube(state: State, matrix: m4.TMatrix4) {
         0, // offset y
         ctx.RGBA,
         ctx.UNSIGNED_BYTE,
-        canvas
+        side.canvas
       );
 
       side.needsUpdateOnCube = false;
@@ -228,8 +231,10 @@ function drawCube(state: State, matrix: m4.TMatrix4) {
 
   state.scene.cube.sides.forEach((side) => {
     assertNotEmpty(cube.textures);
-    ctx.activeTexture(ctx.TEXTURE0 + side.side);
-    ctx.bindTexture(ctx.TEXTURE_2D, cube.textures[side.side]);
+    assertNotEmpty(cube.program);
+
+    ctx.activeTexture(ctx.TEXTURE0 + side.type);
+    ctx.bindTexture(ctx.TEXTURE_2D, cube.textures[side.type]);
   });
 
   // pass transformation matrix

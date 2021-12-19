@@ -75,7 +75,7 @@ export function multiply(a: TMatrix4, b: TMatrix4): TMatrix4 {
  * @return {Vector3} dst or new Vector3 if not provided
  * @memberOf module:webgl-3d-math
  */
-export function normalize(v: Float32Array): Float32Array {
+export function normalize(v: TVec3): TVec3 {
   const res = new Float32Array(3);
 
   const length = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
@@ -98,7 +98,7 @@ export function normalize(v: Float32Array): Float32Array {
  * @return {Vector3} dst or new Vector3 if not provided
  * @memberOf module:webgl-3d-math
  */
-export function subtractVectors(a: TVec3, b: TVec3): Float32Array {
+export function subtractVectors(a: TVec3, b: TVec3): TVec3 {
   const res = new Float32Array(3);
 
   res[0] = a[0] - b[0];
@@ -116,7 +116,7 @@ export function subtractVectors(a: TVec3, b: TVec3): Float32Array {
  * @return {Vector3} dst or new Vector3 if not provided
  * @memberOf module:webgl-3d-math
  */
-export function cross(a: TVec3, b: TVec3): Float32Array {
+export function cross(a: TVec3, b: TVec3): TVec3 {
   const res = new Float32Array(3);
 
   res[0] = a[1] * b[2] - a[2] * b[1];

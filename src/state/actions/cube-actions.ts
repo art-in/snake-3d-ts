@@ -2,7 +2,7 @@ import getCubeRotationForPosition from '../../helpers/get-cube-rotation-for-posi
 import normalizeDegrees from '../../helpers/normalize-degrees';
 import projectToRange from '../../helpers/project-to-range';
 import ECameraMode from '../models/ECameraMode';
-import State from '../models/State';
+import GameState from '../models/GameState';
 
 const AUTO_ROTATION_STEP_MIN = 0.5;
 const AUTO_ROTATION_STEP_MAX = 10;
@@ -12,7 +12,7 @@ const AUTO_ROTATION_STEP_RANGE: [number, number] = [
 ];
 const AUTO_ROTATION_ANGLE_RANGE: [number, number] = [0, 180];
 
-export function autoRotateCycle(state: State): void {
+export function autoRotateCycle(state: GameState): void {
   const {scene} = state;
   const {cube} = scene;
 
@@ -25,7 +25,7 @@ export function autoRotateCycle(state: State): void {
   if (cube.cameraMode === ECameraMode.FollowSnake) {
     const head = state.snake.parts[0];
     state.scene.cube.targetRotation = getCubeRotationForPosition(
-      head.pos,
+      head,
       state.scene.cube.grid
     );
   }

@@ -5,12 +5,15 @@ import normalizeDegrees from '../../helpers/normalize-degrees';
 import {startOrPauseGame} from '../../state/actions/game-actions';
 import {setSnakeDirection} from '../../state/actions/snake-actions';
 import ECameraMode from '../../state/models/ECameraMode';
-import {ECubeSide} from '../../state/models/ECubeSide';
-import {EDirection} from '../../state/models/EDirection';
+import ECubeSide from '../../state/models/ECubeSide';
+import EDirection from '../../state/models/EDirection';
 import EGameStatus from '../../state/models/EGameStatus';
-import State from '../../state/models/State';
+import GameState from '../../state/models/GameState';
 
-export function subscribeToControlEvents(state: State, window: Window): void {
+export function subscribeToControlEvents(
+  state: GameState,
+  window: Window
+): void {
   window.addEventListener(
     'keydown',
     action((event) => onKeyDown(state, event))
@@ -29,7 +32,7 @@ export function subscribeToControlEvents(state: State, window: Window): void {
   );
 }
 
-function onKeyDown(state: State, event: KeyboardEvent) {
+function onKeyDown(state: GameState, event: KeyboardEvent) {
   let direction: EDirection | undefined;
 
   switch (event.code) {
@@ -56,15 +59,13 @@ function onKeyDown(state: State, event: KeyboardEvent) {
   }
 
   if (direction !== undefined) {
-    const headPos = state.snake.parts[0].pos;
+    const headPos = state.snake.parts[0];
     const grid = state.scene.cube.grid;
 
     // adjust direction per current camera rotation
     if (
-      (headPos.cubeSide === ECubeSide.Up &&
-        headPos.gridRow >= grid.rowsCount / 2) ||
-      (headPos.cubeSide === ECubeSide.Down &&
-        headPos.gridRow < grid.rowsCount / 2)
+      (headPos.side === ECubeSide.Up && headPos.row >= grid.rowsCount / 2) ||
+      (headPos.side === ECubeSide.Down && headPos.row < grid.rowsCount / 2)
     ) {
       direction = getOppositeDirection(direction);
     }
@@ -73,22 +74,22 @@ function onKeyDown(state: State, event: KeyboardEvent) {
   }
 }
 
-export function onMouseDown(state: State): void {
+export function onMouseDown(state: GameState): void {
   if (state.status !== EGameStatus.InGame) {
     state.scene.cube.isDragging = true;
     state.scene.cube.cameraMode = ECameraMode.ManualControl;
   }
 }
 
-export function onMouseUp(state: State): void {
+export function onMouseUp(state: GameState): void {
   const {cube} = state.scene;
 
   cube.isDragging = false;
-  cube.clientX = undefined;
-  cube.clientY = undefined;
+  cube.pointerPosX = undefined;
+  cube.pointerPosY = undefined;
 }
 
-export function onMouseMove(state: State, e: MouseEvent): void {
+export function onMouseMove(state: GameState, e: MouseEvent): void {
   const {cube} = state.scene;
 
   if (!cube.isDragging) {
@@ -101,9 +102,9 @@ export function onMouseMove(state: State, e: MouseEvent): void {
     return;
   }
 
-  if (cube.clientX !== undefined && cube.clientY !== undefined) {
-    const dx = cube.clientX - e.clientX;
-    const dy = cube.clientY - e.clientY;
+  if (cube.pointerPosX !== undefined && cube.pointerPosY !== undefined) {
+    const dx = cube.pointerPosX - e.clientX;
+    const dy = cube.pointerPosY - e.clientY;
 
     cube.targetRotation.x -= dy * 0.25;
     cube.targetRotation.y -= dx * 0.25;
@@ -116,6 +117,6 @@ export function onMouseMove(state: State, e: MouseEvent): void {
     cube.needsRedraw = true;
   }
 
-  cube.clientX = e.clientX;
-  cube.clientY = e.clientY;
+  cube.pointerPosX = e.clientX;
+  cube.pointerPosY = e.clientY;
 }

@@ -1,10 +1,10 @@
 import React from 'react';
 import {observer} from 'mobx-react-lite';
-import State from '../../state/models/State';
+import GameState from '../../state/models/GameState';
 import classes from './DebugPanel.css';
 
 interface DebugPanelProps {
-  state: State;
+  state: GameState;
 }
 
 function DebugPanel(props: DebugPanelProps): JSX.Element {

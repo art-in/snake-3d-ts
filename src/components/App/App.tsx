@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
-import {ECubeSide} from '../../state/models/ECubeSide';
-import State from '../../state/models/State';
+import ECubeSide from '../../state/models/ECubeSide';
+import GameState from '../../state/models/GameState';
 import DebugCubeSide from '../DebugCubeSide';
 import DebugPanel from '../DebugPanel/DebugPanel';
 import Scene from '../Scene';
@@ -11,7 +11,7 @@ const SHOW_DEBUG_CUBE_SIDES = false;
 const SHOW_DEBUG_PANEL = false;
 
 export default function App(): JSX.Element {
-  const [state] = useState(new State());
+  const [state] = useState(new GameState());
 
   return (
     <div className={classes.root}>

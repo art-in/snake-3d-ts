@@ -3,12 +3,11 @@
 	"build": {
 		"dockerfile": "Dockerfile"
 	},
-	"settings": { 
-		"terminal.integrated.shell.linux": "/bin/bash"
-	},
 	"extensions": [
+		"eamodio.gitlens",
 		"dbaeumer.vscode-eslint",
-		"ms-vscode.vscode-typescript-tslint-plugin"
+		"ms-vscode.vscode-typescript-tslint-plugin",
+		"slevesque.shader"
 	],
-	"forwardPorts": [3000],
+	"forwardPorts": [3000]
 }

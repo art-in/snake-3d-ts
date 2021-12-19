@@ -1,0 +1,3 @@
+# files to ignore in github lang stats
+config/* linguist-vendored
+scripts/* linguist-vendored

@@ -1,4 +1,4 @@
-import GameState from '../../state/models/GameState';
+import GameState from '../../models/GameState';
 import {
   createProgram,
   getAttributeLocation,
@@ -8,8 +8,8 @@ import {
 import * as m4 from '../../helpers/m4';
 import {IShaderDescriptor} from '../../helpers/webgl.types';
 import assertNotEmpty from '../../helpers/assert-not-empty';
-import Cube from '../../state/models/Cube';
-import ECubeSide from '../../state/models/ECubeSide';
+import Cube from '../../models/Cube';
+import ECubeSide from '../../models/ECubeSide';
 import {degToRad} from '../../helpers/deg-to-rad';
 import {cubeVertexCoords} from './geometry/cube-vertex-coords';
 import {cubeTextureCoords} from './geometry/cube-texture-coords';
@@ -34,23 +34,77 @@ export function initCubeDrawer(state: GameState): void {
     {src: cubeFragmentShader, type: ctx.FRAGMENT_SHADER},
   ];
 
-  cube.program = createProgram(ctx, shaderDescriptors);
+  const program = (cube.program = createProgram(ctx, shaderDescriptors));
+  ctx.useProgram(program);
 
-  ctx.useProgram(cube.program);
+  // lookup locations for attributes/uniforms
+  const cubeVertexCoordLocation = getAttributeLocation(
+    ctx,
+    program,
+    'a_cube_vertex_coord'
+  );
+  const cubeVertexSideLocation = getAttributeLocation(
+    ctx,
+    program,
+    'a_cube_vertex_side'
+  );
+  const cubeTextureCoordLocation = getAttributeLocation(
+    ctx,
+    program,
+    'a_cube_texture_coord'
+  );
+  cube.matrixUniformLocation = getUniformLocation(ctx, program, 'u_matrix');
 
   // pass buffer with vertex coordinates
   const cubeVertexCoordsBuffer = ctx.createBuffer();
+  assertNotEmpty(cubeVertexCoordsBuffer);
   ctx.bindBuffer(ctx.ARRAY_BUFFER, cubeVertexCoordsBuffer);
   ctx.bufferData(ctx.ARRAY_BUFFER, cubeVertexCoords, ctx.STATIC_DRAW);
-  assertNotEmpty(cubeVertexCoordsBuffer);
-  cube.vertexCoordsBuffer = cubeVertexCoordsBuffer;
 
   // pass buffer with texture coordinates
   const cubeTextureCoordsBuffer = ctx.createBuffer();
+  assertNotEmpty(cubeTextureCoordsBuffer);
   ctx.bindBuffer(ctx.ARRAY_BUFFER, cubeTextureCoordsBuffer);
   ctx.bufferData(ctx.ARRAY_BUFFER, cubeTextureCoords, ctx.STATIC_DRAW);
-  assertNotEmpty(cubeTextureCoordsBuffer);
-  cube.textureCoordsBuffer = cubeTextureCoordsBuffer;
+
+  // define how to extract coordinates from vertex buffer
+  ctx.enableVertexAttribArray(cubeVertexCoordLocation);
+  ctx.bindBuffer(ctx.ARRAY_BUFFER, cubeVertexCoordsBuffer);
+
+  vertexAttributePointer(ctx, {
+    location: cubeVertexCoordLocation,
+    size: 3, // 3 components per iteration
+    type: ctx.FLOAT, // the data is 32bit floats
+    normalize: false,
+    stride: 16, // (bytes) each vertex consists of 4 x 4-byte floats (side, x, y, z)
+    offset: 4, // (bytes) skip side float
+  });
+
+  // define how to extract cube side index from vertex buffer
+  ctx.enableVertexAttribArray(cubeVertexSideLocation);
+  ctx.bindBuffer(ctx.ARRAY_BUFFER, cubeVertexCoordsBuffer);
+
+  vertexAttributePointer(ctx, {
+    location: cubeVertexSideLocation,
+    size: 1,
+    type: ctx.FLOAT,
+    normalize: false,
+    stride: 16,
+    offset: 0,
+  });
+
+  // define how to extract coordinates from texture coordinates buffer
+  ctx.enableVertexAttribArray(cubeTextureCoordLocation);
+  ctx.bindBuffer(ctx.ARRAY_BUFFER, cubeTextureCoordsBuffer);
+
+  vertexAttributePointer(ctx, {
+    location: cubeTextureCoordLocation,
+    size: 2,
+    type: ctx.FLOAT,
+    normalize: false,
+    stride: 0,
+    offset: 0,
+  });
 
   // create textures for cube sides
   const cubeTextures: WebGLTexture[] = [];
@@ -59,8 +113,9 @@ export function initCubeDrawer(state: GameState): void {
     assertNotEmpty(texture);
     cubeTextures.push(texture);
 
+    // bind uniform with texture unit
     const cubeTextureSideLocation = ctx.getUniformLocation(
-      cube.program,
+      program,
       'u_cube_texture_side_' + side
     );
 
@@ -69,19 +124,20 @@ export function initCubeDrawer(state: GameState): void {
 
   cube.textures = cubeTextures;
 
-  // pass texture data for the first time (later will update them)
-  state.scene.cube.sides.forEach((side) => {
+  // pass texture data for the first time (update later in draw loop)
+  cube.sides.forEach((side) => {
     const canvas = side.canvas;
     assertNotEmpty(canvas);
 
+    ctx.activeTexture(ctx.TEXTURE0 + side.type); // select texture unit
     ctx.bindTexture(ctx.TEXTURE_2D, cubeTextures[side.type]);
     ctx.texImage2D(
-      ctx.TEXTURE_2D,
-      0,
-      ctx.RGBA,
-      ctx.RGBA,
-      ctx.UNSIGNED_BYTE,
-      canvas
+      ctx.TEXTURE_2D, // target
+      0, // level
+      ctx.RGBA, // internal format
+      ctx.RGBA, // format
+      ctx.UNSIGNED_BYTE, // type
+      canvas // source
     );
 
     ctx.texParameteri(ctx.TEXTURE_2D, ctx.TEXTURE_WRAP_S, ctx.CLAMP_TO_EDGE);
@@ -96,7 +152,7 @@ function shouldRedrawCube(cube: Cube) {
   return cube.needsRedraw || cube.sides.some((s) => s.needsUpdateOnCube);
 }
 
-export function drawCubeCycle(state: GameState): void {
+export function drawCubeLoop(state: GameState): void {
   const {scene} = state;
   const {canvas, ctx, cube} = scene;
 
@@ -108,12 +164,12 @@ export function drawCubeCycle(state: GameState): void {
   }
 
   // define how to convert from clip space to canvas pixels
-  ctx.viewport(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.viewport(0, 0, canvas.width, canvas.height);
 
   ctx.enable(ctx.CULL_FACE);
   ctx.enable(ctx.DEPTH_TEST);
 
-  // clear the canvas AND the depth buffer.
+  // clear the canvas and the depth buffer
   ctx.clear(ctx.COLOR_BUFFER_BIT | ctx.DEPTH_BUFFER_BIT);
 
   // calculate transformation matrix
@@ -135,118 +191,49 @@ export function drawCubeCycle(state: GameState): void {
   matrix = m4.yRotate(matrix, degToRad(cube.currentRotation.y));
 
   drawCube(state, matrix);
-
-  cube.needsRedraw = false;
 }
 
 function drawCube(state: GameState, matrix: m4.TMatrix4) {
-  const {ctx, canvas, cube} = state.scene;
+  const {ctx, cube} = state.scene;
 
   assertNotEmpty(ctx);
-  assertNotEmpty(canvas);
   assertNotEmpty(cube.program);
-  assertNotEmpty(cube.textures);
-  assertNotEmpty(cube.vertexCoordsBuffer);
-  assertNotEmpty(cube.textureCoordsBuffer);
 
   ctx.useProgram(cube.program);
 
-  // define how to extract coordinates from vertex buffer
-  const cubeVertexCoordLocation = getAttributeLocation(
-    ctx,
-    cube.program,
-    'a_cube_vertex_coord'
-  );
-
-  ctx.enableVertexAttribArray(cubeVertexCoordLocation);
-  ctx.bindBuffer(ctx.ARRAY_BUFFER, cube.vertexCoordsBuffer);
-
-  vertexAttributePointer(ctx, {
-    location: cubeVertexCoordLocation,
-    size: 3, // 3 components per iteration
-    type: ctx.FLOAT, // the data is 32bit floats
-    normalize: false,
-    stride: 16, //(bytes) each vertex consists of 4 x 4-byte floats (side, x, y, z)
-    offset: 4, // (bytes) skip side float
-  });
-
-  // define how to extract cube side index from vertex buffer
-  const cubeVertexSideLocation = getAttributeLocation(
-    ctx,
-    cube.program,
-    'a_cube_vertex_side'
-  );
-
-  ctx.enableVertexAttribArray(cubeVertexSideLocation);
-  ctx.bindBuffer(ctx.ARRAY_BUFFER, cube.vertexCoordsBuffer);
-
-  vertexAttributePointer(ctx, {
-    location: cubeVertexSideLocation,
-    size: 1,
-    type: ctx.FLOAT,
-    normalize: false,
-    stride: 16, // (bytes) each vertex consists of 4 x 4-byte floats (side, x, y, z)
-    offset: 0,
-  });
-
-  // define how to extract coordinates from texture coordinates buffer
-  const cubeTextureCoordLocation = getAttributeLocation(
-    ctx,
-    cube.program,
-    'a_cube_texture_coord'
-  );
-
-  ctx.enableVertexAttribArray(cubeTextureCoordLocation);
-  ctx.bindBuffer(ctx.ARRAY_BUFFER, cube.textureCoordsBuffer);
-
-  vertexAttributePointer(ctx, {
-    location: cubeTextureCoordLocation,
-    size: 2, // 2 components per iteration
-    type: ctx.FLOAT, // the data is 32bit floats
-    normalize: false,
-    stride: 0,
-    offset: 0,
-  });
-
   // update texture data if needed
-  state.scene.cube.sides.forEach((side) => {
+  cube.sides.forEach((side) => {
     if (side.needsUpdateOnCube) {
       assertNotEmpty(side.canvas);
       assertNotEmpty(cube.textures);
 
+      ctx.activeTexture(ctx.TEXTURE0 + side.type); // select texture unit
       ctx.bindTexture(ctx.TEXTURE_2D, cube.textures[side.type]);
       ctx.texSubImage2D(
-        ctx.TEXTURE_2D,
+        ctx.TEXTURE_2D, // target
         0, // level
         0, // offset x
         0, // offset y
-        ctx.RGBA,
-        ctx.UNSIGNED_BYTE,
-        side.canvas
+        ctx.RGBA, // format
+        ctx.UNSIGNED_BYTE, // type
+        side.canvas // source
       );
 
       side.needsUpdateOnCube = false;
     }
   });
 
-  state.scene.cube.sides.forEach((side) => {
-    assertNotEmpty(cube.textures);
-    assertNotEmpty(cube.program);
-
-    ctx.activeTexture(ctx.TEXTURE0 + side.type);
-    ctx.bindTexture(ctx.TEXTURE_2D, cube.textures[side.type]);
-  });
-
   // pass transformation matrix
-  const matrixLocation = getUniformLocation(ctx, cube.program, 'u_matrix');
-  ctx.uniformMatrix4fv(matrixLocation, false, matrix);
+  assertNotEmpty(cube.matrixUniformLocation);
+  ctx.uniformMatrix4fv(cube.matrixUniformLocation, false, matrix);
 
   // draw the geometry
-  const cubeSidesCount = 6;
-  const trianglesPerCubeSideCount = 2;
-  const verticesPerTriangleCount = 3;
-  const totalVerticesCount =
-    cubeSidesCount * trianglesPerCubeSideCount * verticesPerTriangleCount;
+  const CUBE_VERTICES_COUNT =
+    6 * // cube sides
+    2 * // triangles per cube side
+    3; // vertices per triangle
 
-  ctx.drawArrays(ctx.TRIANGLES, 0, totalVerticesCount);
+  ctx.drawArrays(ctx.TRIANGLES, 0, CUBE_VERTICES_COUNT);
+
+  cube.needsRedraw = false;
 }

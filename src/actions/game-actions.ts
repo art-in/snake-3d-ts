@@ -1,12 +1,12 @@
+import isEqualCubePositions from '../helpers/is-equal-cube-positions';
+import getRandomCubePosition from '../helpers/get-random-cube-position';
 import Snake from '../models/Snake';
 import GameState from '../models/GameState';
-import * as snakeActions from './snake-actions';
-import * as sceneActions from './scene-actions';
 import EGameStatus from '../models/EGameStatus';
-import isEqualCubePositions from '../../helpers/is-equal-cube-positions';
-import getRandomCubePosition from '../../helpers/get-random-cube-position';
 import ECameraMode from '../models/ECameraMode';
 import ICubePosition from '../models/ICubePosition';
+import * as snakeActions from './snake-actions';
+import * as cubeActions from './cube-actions';
 
 const APPLES_COUNT = 10;
 const STONES_COUNT = 10;
@@ -16,9 +16,9 @@ export function initGameState(state: GameState): void {
   plantObjects(state);
 }
 
-export function updateGameStateCycle(state: GameState): void {
-  snakeActions.moveSnakeCycle(state);
-  sceneActions.updateSceneCycle(state);
+export function updateGameStateLoop(state: GameState): void {
+  snakeActions.moveSnakeLoop(state);
+  cubeActions.autoRotateLoop(state);
 
   if (state.status === EGameStatus.InGame) {
     if (state.snake.isCrashed) {
@@ -67,15 +67,16 @@ export function plantObjects(state: GameState): void {
 }
 
 export function startOrPauseGame(state: GameState): void {
-  if (state.status === EGameStatus.Welcome) {
+  if (
+    state.status === EGameStatus.Welcome ||
+    state.status === EGameStatus.Paused
+  ) {
     state.status = EGameStatus.InGame;
   } else if (
     state.status === EGameStatus.Win ||
     state.status === EGameStatus.Fail
   ) {
     plantObjects(state);
-    state.status = EGameStatus.InGame;
-  } else if (state.status === EGameStatus.Paused) {
     state.status = EGameStatus.InGame;
   } else if (state.status === EGameStatus.InGame) {
     state.status = EGameStatus.Paused;

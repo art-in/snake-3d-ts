@@ -1,6 +1,6 @@
 import React from 'react';
 import {observer} from 'mobx-react-lite';
-import GameState from '../../state/models/GameState';
+import GameState from '../../models/GameState';
 import classes from './DebugPanel.css';
 
 interface DebugPanelProps {

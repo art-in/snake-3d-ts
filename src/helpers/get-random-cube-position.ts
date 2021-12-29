@@ -1,5 +1,5 @@
-import Cube from '../state/models/Cube';
-import ICubePosition from '../state/models/ICubePosition';
+import Cube from '../models/Cube';
+import ICubePosition from '../models/ICubePosition';
 
 export default function getRandomCubePosition(cube: Cube): ICubePosition {
   return {

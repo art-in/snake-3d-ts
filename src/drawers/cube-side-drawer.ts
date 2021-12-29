@@ -2,12 +2,21 @@ import assertNotEmpty from '../helpers/assert-not-empty';
 import getCanvasFontString from '../helpers/get-canvas-font-string';
 import getCubeSideLabel from '../helpers/get-cube-side-label';
 import measureCanvasText from '../helpers/measure-canvas-text';
-import ECubeSide from '../state/models/ECubeSide';
-import EGameStatus from '../state/models/EGameStatus';
-import GameState from '../state/models/GameState';
+import ECubeSide from '../models/ECubeSide';
+import EGameStatus from '../models/EGameStatus';
+import GameState from '../models/GameState';
 
 const DRAW_SIDE_LABELS = false;
 
+// sides are drawn in 2D context and passed as textures to 3D cube.
+// this is not very performant approach, since we need to upload entire side
+// image when something small changes on it. faster wound be to upload object
+// positions only and draw them as separate 3D entities, textures untouched.
+// I've dodged this approach because I guess it would be harder to code, while
+// I want it to be as basic as possible without diving into 3D coding hell
+// (for that I would chose some 3D library) ie. need to calculate 3D positions
+// for all objects, apply different textures for different objects (snake,
+// stones, apples, status overlays), etc.
 export function initCubeSideDrawer(state: GameState, side: ECubeSide): void {
   const canvas = document.createElement('canvas');
 
@@ -23,9 +32,8 @@ export function initCubeSideDrawer(state: GameState, side: ECubeSide): void {
   state.scene.cube.sides[side].needsUpdateOnCube = true;
 }
 
-export function drawCubeSideCycle(state: GameState, cubeSide: ECubeSide): void {
-  const {scene, snake, apples, stones} = state;
-  const {grid} = scene.cube;
+export function drawCubeSideLoop(state: GameState, cubeSide: ECubeSide): void {
+  const {grid} = state.scene.cube;
 
   const side = state.scene.cube[cubeSide];
   if (!side.needsRedraw) {
@@ -49,14 +57,14 @@ export function drawCubeSideCycle(state: GameState, cubeSide: ECubeSide): void {
   const cellWidth = width / grid.colsCount;
   const cellHeight = height / grid.rowsCount;
 
-  for (let colIdx = 1; colIdx < grid.colsCount; colIdx++) {
-    const x = colIdx * cellWidth;
+  for (let i = 1; i < grid.colsCount; i++) {
+    const x = i * cellWidth;
     ctx.moveTo(x, 0);
     ctx.lineTo(x, height);
   }
 
-  for (let rowIdx = 1; rowIdx < grid.rowsCount; rowIdx++) {
-    const y = rowIdx * cellHeight;
+  for (let i = 1; i < grid.rowsCount; i++) {
+    const y = i * cellHeight;
     ctx.moveTo(0, y);
     ctx.lineTo(width, y);
   }
@@ -66,7 +74,7 @@ export function drawCubeSideCycle(state: GameState, cubeSide: ECubeSide): void {
 
   // draw snake
   ctx.fillStyle = 'red';
-  snake.parts.forEach((part) => {
+  state.snake.parts.forEach((part) => {
     if (part.side === cubeSide) {
       ctx.fillRect(
         part.col * cellWidth,
@@ -79,7 +87,7 @@ export function drawCubeSideCycle(state: GameState, cubeSide: ECubeSide): void {
 
   // draw apples
   ctx.fillStyle = 'green';
-  apples.forEach((apple) => {
+  state.apples.forEach((apple) => {
     if (apple.side === cubeSide) {
       ctx.fillRect(
         apple.col * cellWidth,
@@ -92,11 +100,11 @@ export function drawCubeSideCycle(state: GameState, cubeSide: ECubeSide): void {
 
   // draw stones
   ctx.fillStyle = 'black';
-  stones.forEach((apple) => {
-    if (apple.side === cubeSide) {
+  state.stones.forEach((stone) => {
+    if (stone.side === cubeSide) {
       ctx.fillRect(
-        apple.col * cellWidth,
-        height - apple.row * cellHeight - cellHeight,
+        stone.col * cellWidth,
+        height - stone.row * cellHeight - cellHeight,
         cellWidth,
         cellHeight
       );

@@ -1,4 +1,4 @@
-import IPoint3D from '../state/models/IPoint3D';
+import IPoint3D from '../models/IPoint3D';
 
 export default function getAngleBetweenVectors(
   a: IPoint3D,

@@ -1,16 +1,16 @@
-import assertNotEmpty from '../../helpers/assert-not-empty';
-import clone from '../../helpers/clone';
-import getOppositeDirection from '../../helpers/get-opposite-direction';
-import isEqualCubePositions from '../../helpers/is-equal-cube-positions';
+import assertNotEmpty from '../helpers/assert-not-empty';
+import clone from '../helpers/clone';
+import getOppositeDirection from '../helpers/get-opposite-direction';
+import isEqualCubePositions from '../helpers/is-equal-cube-positions';
+import getNextCubePositionAndDirection from '../helpers/get-next-cube-position-and-direction';
 import GameState from '../models/GameState';
 import EDirection from '../models/EDirection';
 import EGameStatus from '../models/EGameStatus';
-import getNextCubePositionAndDirection from '../../helpers/get-next-cube-position-and-direction';
 
 const SNAKE_MOVE_PERIOD_MULTIPLIER = 0.05; // higher is faster
-const MOVE_SNAKE = true;
+const MOVE_SNAKE = true; // for debug
 
-export function moveSnakeCycle(state: GameState): void {
+export function moveSnakeLoop(state: GameState): void {
   const {snake} = state;
   if (
     MOVE_SNAKE &&
@@ -34,7 +34,7 @@ export function moveSnake(state: GameState): void {
 
   assertNotEmpty(tail);
 
-  state.scene.cube[tail.side].needsRedraw = true;
+  scene.cube[tail.side].needsRedraw = true;
 
   const {nextPos, nextDirection} = getNextCubePositionAndDirection(
     head,
@@ -47,9 +47,8 @@ export function moveSnake(state: GameState): void {
   snake.parts.unshift(tail);
 
   head = snake.parts[0];
-  tail = snake.parts[snake.parts.length - 1];
 
-  state.scene.cube[head.side].needsRedraw = true;
+  scene.cube[head.side].needsRedraw = true;
 
   checkForApple(state);
   checkCrash(state);
@@ -90,9 +89,7 @@ export function checkCrash(state: GameState): void {
   const head = snake.parts[0];
 
   // crash on stone
-  for (let i = 0; i < stones.length; i++) {
-    const stone = stones[i];
-
+  for (const stone of stones) {
     if (isEqualCubePositions(stone, head)) {
       snake.isCrashed = true;
       break;

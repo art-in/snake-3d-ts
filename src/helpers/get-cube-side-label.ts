@@ -1,4 +1,4 @@
-import ECubeSide from '../state/models/ECubeSide';
+import ECubeSide from '../models/ECubeSide';
 
 export default function getCubeSideLabel(side: ECubeSide): string {
   switch (side) {

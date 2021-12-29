@@ -6,3 +6,5 @@ FROM mcr.microsoft.com/vscode/devcontainers/typescript-node:0-14
 
 # [Optional] Uncomment if you want to install more global node packages
 # RUN sudo -u node npm install -g <your-package-list -here>
+
+ENV USER=root

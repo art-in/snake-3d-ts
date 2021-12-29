@@ -1,6 +1,6 @@
-import getCubeRotationForPosition from '../../helpers/get-cube-rotation-for-position';
-import normalizeDegrees from '../../helpers/normalize-degrees';
-import projectToRange from '../../helpers/project-to-range';
+import getCubeRotationForPosition from '../helpers/get-cube-rotation-for-position';
+import normalizeDegrees from '../helpers/normalize-degrees';
+import projectToRange from '../helpers/project-to-range';
 import ECameraMode from '../models/ECameraMode';
 import GameState from '../models/GameState';
 
@@ -12,11 +12,11 @@ const AUTO_ROTATION_STEP_RANGE: [number, number] = [
 ];
 const AUTO_ROTATION_ANGLE_RANGE: [number, number] = [0, 180];
 
-export function autoRotateCycle(state: GameState): void {
+export function autoRotateLoop(state: GameState): void {
   const {scene} = state;
   const {cube} = scene;
 
-  const {currentRotation, targetRotation} = scene.cube;
+  const {currentRotation, targetRotation} = cube;
 
   if (cube.cameraMode === ECameraMode.Overview) {
     targetRotation.y = normalizeDegrees(targetRotation.y - 0.3);
@@ -24,10 +24,7 @@ export function autoRotateCycle(state: GameState): void {
 
   if (cube.cameraMode === ECameraMode.FollowSnake) {
     const head = state.snake.parts[0];
-    state.scene.cube.targetRotation = getCubeRotationForPosition(
-      head,
-      state.scene.cube.grid
-    );
+    cube.targetRotation = getCubeRotationForPosition(head, cube.grid);
   }
 
   if (
@@ -55,17 +52,17 @@ function makeRotationStep(currentAngle: number, targetAngle: number): number {
 
   if (angleDiff < AUTO_ROTATION_STEP_MIN) {
     return targetAngle;
-  } else {
-    const rotationStep = projectToRange(
-      angleDiff,
-      AUTO_ROTATION_ANGLE_RANGE,
-      AUTO_ROTATION_STEP_RANGE
-    );
-    const nextCurrentRotation =
-      currentAngle +
-      rotationStep * getRotationDirection(currentAngle, targetAngle);
-    return normalizeDegrees(nextCurrentRotation);
   }
+
+  const rotationStep = projectToRange(
+    angleDiff,
+    AUTO_ROTATION_ANGLE_RANGE,
+    AUTO_ROTATION_STEP_RANGE
+  );
+  const nextCurrentRotation =
+    currentAngle +
+    rotationStep * getRotationDirection(currentAngle, targetAngle);
+  return normalizeDegrees(nextCurrentRotation);
 }
 
 function getRotationDirection(fromDeg: number, toDeg: number): number {

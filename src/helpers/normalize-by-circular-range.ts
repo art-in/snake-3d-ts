@@ -5,7 +5,7 @@ export default function normalizeByCircularRange(
   start: number,
   end: number
 ): number {
-  const width = end - start; //
+  const width = end - start;
   const offsetValue = value - start; // value relative to 0
 
   return offsetValue - Math.floor(offsetValue / width) * width + start;

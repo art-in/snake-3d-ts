@@ -1,8 +1,7 @@
-import ECubeSide from '../state/models/ECubeSide';
-import EDirection from '../state/models/EDirection';
-import ICubePosition from '../state/models/ICubePosition';
-import IGrid from '../state/models/IGrid';
-import assertNotEmpty from './assert-not-empty';
+import ECubeSide from '../models/ECubeSide';
+import EDirection from '../models/EDirection';
+import ICubePosition from '../models/ICubePosition';
+import IGrid from '../models/IGrid';
 import clone from './clone';
 
 export default function getNextCubePositionAndDirection(
@@ -27,9 +26,6 @@ export default function getNextCubePositionAndDirection(
       nextPos.col += 1;
       break;
   }
-
-  assertNotEmpty(grid.rowsCount);
-  assertNotEmpty(grid.colsCount);
 
   // describe how cube sides adjust with each other when jumping from one side
   // to another

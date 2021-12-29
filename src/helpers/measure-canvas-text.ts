@@ -1,4 +1,4 @@
-import ISize from '../state/models/ISize';
+import ISize from '../models/ISize';
 
 export default function measureCanvasText(
   ctx: CanvasRenderingContext2D,

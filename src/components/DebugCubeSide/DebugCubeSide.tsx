@@ -1,8 +1,8 @@
 import React, {useEffect, useRef} from 'react';
 import cn from 'classnames';
 import assertNotEmpty from '../../helpers/assert-not-empty';
-import ECubeSide from '../../state/models/ECubeSide';
-import GameState from '../../state/models/GameState';
+import ECubeSide from '../../models/ECubeSide';
+import GameState from '../../models/GameState';
 import classes from './DebugCubeSide.css';
 
 interface ICubeSideProps {

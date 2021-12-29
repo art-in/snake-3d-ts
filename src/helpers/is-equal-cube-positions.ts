@@ -1,4 +1,4 @@
-import ICubePosition from '../state/models/ICubePosition';
+import ICubePosition from '../models/ICubePosition';
 
 export default function isEqualCubePositions(
   a: ICubePosition,

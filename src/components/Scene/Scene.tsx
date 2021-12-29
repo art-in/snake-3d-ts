@@ -1,12 +1,12 @@
-import {action} from 'mobx';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
-import * as gameActions from '../../state/actions/game-actions';
-import * as sceneDrawer from '../../drawers/scene-drawer';
-import ISize from '../../state/models/ISize';
+import {action} from 'mobx';
 import assertNotEmpty from '../../helpers/assert-not-empty';
-import GameState from '../../state/models/GameState';
 import resizeCanvas from '../../helpers/resize-canvas';
-import {subscribeToControlEvents} from './control-events';
+import ISize from '../../models/ISize';
+import GameState from '../../models/GameState';
+import * as gameActions from '../../actions/game-actions';
+import * as controlActions from '../../actions/control-actions';
+import * as sceneDrawer from '../../drawers/scene-drawer';
 
 interface ISceneProps {
   state: GameState;
@@ -33,8 +33,8 @@ export default function Scene({state}: ISceneProps): JSX.Element {
   }, []);
 
   const onResize = useCallback(() => {
-    assertNotEmpty(canvasRef.current, 'Failed to get canvas element');
     const canvas = canvasRef.current;
+    assertNotEmpty(canvas, 'Failed to get canvas element');
 
     const windowSize: ISize = {
       width: window.document.body.clientWidth,
@@ -43,24 +43,48 @@ export default function Scene({state}: ISceneProps): JSX.Element {
     resizeCanvas(canvas, windowSize, devicePixelRatio);
   }, []);
 
-  useEffect(() => {
+  const subscribe = useCallback(() => {
     window.addEventListener('resize', onResize);
-    onResize();
-    init();
-    subscribeToControlEvents(state, window);
+    window.addEventListener(
+      'keydown',
+      action((event) => controlActions.onKeyDown(state, event.code))
+    );
+    window.addEventListener(
+      'mousedown',
+      action(() => controlActions.onMouseDown(state))
+    );
+    window.addEventListener(
+      'mouseup',
+      action(() => controlActions.onMouseUp(state))
+    );
+    window.addEventListener(
+      'mousemove',
+      action((event) =>
+        controlActions.onMouseMove(state, {
+          x: event.clientX,
+          y: event.clientY,
+        })
+      )
+    );
   }, []);
 
-  const renderCycle = useCallback(
+  const loop = useCallback(
     action(() => {
-      gameActions.updateGameStateCycle(state);
-      sceneDrawer.drawSceneCycle(state);
+      gameActions.updateGameStateLoop(state);
+      sceneDrawer.drawSceneLoop(state);
 
-      requestAnimationFrame(renderCycle);
+      requestAnimationFrame(loop);
     }),
     []
   );
 
-  useEffect(renderCycle, []);
+  useEffect(() => {
+    init();
+    onResize();
+    subscribe();
+  }, []);
+
+  useEffect(loop, []);
 
   return <canvas ref={canvasRef} />;
 }

@@ -4,25 +4,25 @@ import ECameraMode from './ECameraMode';
 import ECubeSide from './ECubeSide';
 import IGrid from './IGrid';
 import IModelRotation from './IModelRotation';
+import IPoint2D from './IPoint2D';
 
 export default class Cube {
   program?: WebGLProgram;
-  vertexCoordsBuffer?: WebGLBuffer;
-  textureCoordsBuffer?: WebGLBuffer;
-
+  matrixUniformLocation?: WebGLUniformLocation;
   textures?: WebGLTexture[];
 
   targetRotation: IModelRotation = {x: 0, y: 0};
   currentRotation: IModelRotation = {x: 0, y: 0};
+
   cameraMode: ECameraMode = ECameraMode.Overview;
 
-  isDragging?: boolean;
-  pointerPosX?: number;
-  pointerPosY?: number;
+  mouseIsDragging?: boolean;
+  mousePos?: IPoint2D;
 
   needsRedraw = true;
 
-  grid: IGrid = {rowsCount: 16, colsCount: 16};
+  static GRID_SIZE = 16;
+  grid: IGrid = {rowsCount: Cube.GRID_SIZE, colsCount: Cube.GRID_SIZE};
 
   sides: CubeSide[] = [];
 

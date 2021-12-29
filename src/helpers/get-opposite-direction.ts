@@ -1,4 +1,4 @@
-import EDirection from '../state/models/EDirection';
+import EDirection from '../models/EDirection';
 
 export default function getOppositeDirection(
   direction: EDirection

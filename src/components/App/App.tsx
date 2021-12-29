@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
-import ECubeSide from '../../state/models/ECubeSide';
-import GameState from '../../state/models/GameState';
+import ECubeSide from '../../models/ECubeSide';
+import GameState from '../../models/GameState';
 import DebugCubeSide from '../DebugCubeSide';
 import DebugPanel from '../DebugPanel/DebugPanel';
 import Scene from '../Scene';

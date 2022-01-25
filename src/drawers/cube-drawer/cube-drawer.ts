@@ -5,7 +5,7 @@ import {
   getUniformLocation,
   vertexAttributePointer,
 } from '../../helpers/webgl';
-import * as m4 from '../../helpers/m4';
+import * as gmath from '../../helpers/graphics-math';
 import {IShaderDescriptor} from '../../helpers/webgl.types';
 import assertNotEmpty from '../../helpers/assert-not-empty';
 import Cube from '../../models/Cube';
@@ -174,26 +174,31 @@ export function drawCubeLoop(state: GameState): void {
 
   // calculate transformation matrix
   const aspect = canvas.clientWidth / canvas.clientHeight;
-  const projectionMatrix = m4.perspective(FIELD_OF_VIEW_RAD, aspect, 1, 2000);
+  const projectionMatrix = gmath.perspective(
+    FIELD_OF_VIEW_RAD,
+    aspect,
+    1,
+    2000
+  );
 
   const cameraPosition = [0, 0, 2];
   const up = [0, 1, 0];
   const target = [0, 0, 0];
 
-  const cameraMatrix = m4.lookAt(cameraPosition, target, up);
-  const viewMatrix = m4.inverse(cameraMatrix);
-  const viewProjectionMatrix = m4.multiply(projectionMatrix, viewMatrix);
+  const cameraMatrix = gmath.lookAt(cameraPosition, target, up);
+  const viewMatrix = gmath.inverse(cameraMatrix);
+  const viewProjectionMatrix = gmath.multiply(projectionMatrix, viewMatrix);
 
-  let matrix = m4.xRotate(
+  let matrix = gmath.xRotate(
     viewProjectionMatrix,
     degToRad(cube.currentRotation.x)
   );
-  matrix = m4.yRotate(matrix, degToRad(cube.currentRotation.y));
+  matrix = gmath.yRotate(matrix, degToRad(cube.currentRotation.y));
 
   drawCube(state, matrix);
 }
 
-function drawCube(state: GameState, matrix: m4.TMatrix4) {
+function drawCube(state: GameState, matrix: gmath.TMatrix4) {
   const {ctx, cube} = state.scene;
 
   assertNotEmpty(ctx);

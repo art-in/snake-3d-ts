@@ -149,6 +149,7 @@ export function drawCubeSideLoop(state: GameState, cubeSide: ECubeSide): void {
       overlayHeight
     );
 
+    // title
     ctx.fillStyle = 'black';
     ctx.font = getCanvasFontString(70, 'Consolas', 'px', 'bold');
     const title =
@@ -160,13 +161,14 @@ export function drawCubeSideLoop(state: GameState, cubeSide: ECubeSide): void {
         ? 'FAIL'
         : 'SNAKE 3D';
 
-    const headerSize = measureCanvasText(ctx, title);
+    const titleSize = measureCanvasText(ctx, title);
     ctx.fillText(
       title,
-      width / 2 - headerSize.width / 2,
-      height / 2 + headerSize.height / 2
+      width / 2 - titleSize.width / 2,
+      height / 2 + titleSize.height / 2
     );
 
+    // controls hint
     ctx.font = getCanvasFontString(20, 'Consolas');
     const controlsHint = 'WSAD/arrows to control';
     const controlsHintSize = measureCanvasText(ctx, controlsHint);
@@ -176,6 +178,7 @@ export function drawCubeSideLoop(state: GameState, cubeSide: ECubeSide): void {
       overlayVerticalMargin + overlayPadding + controlsHintSize.height
     );
 
+    // start hint
     ctx.font = getCanvasFontString(20, 'Consolas');
     const startHint = 'space/enter to start';
     const startHintSize = measureCanvasText(ctx, startHint);

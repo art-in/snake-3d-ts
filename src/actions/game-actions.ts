@@ -4,7 +4,6 @@ import Snake from '../models/Snake';
 import GameState from '../models/GameState';
 import EGameStatus from '../models/EGameStatus';
 import ECameraMode from '../models/ECameraMode';
-import ICubePosition from '../models/ICubePosition';
 import * as snakeActions from './snake-actions';
 import * as cubeActions from './cube-actions';
 
@@ -37,49 +36,46 @@ export function updateGameStateLoop(state: GameState): void {
 
 export function plantObjects(state: GameState): void {
   const {scene} = state;
+
+  // plant snake
   state.snake = new Snake();
 
   // plant apples
-  const apples: ICubePosition[] = [];
+  state.apples = [];
 
   for (let i = 0; i < APPLES_COUNT; i++) {
     const pos = getRandomCubePosition(scene.cube);
-    apples.push(pos);
+    state.apples.push(pos);
   }
 
-  state.apples = apples;
-
   // plant stones
-  const stones: ICubePosition[] = [];
+  state.stones = [];
 
-  while (stones.length < STONES_COUNT) {
+  while (state.stones.length < STONES_COUNT) {
     const pos = getRandomCubePosition(scene.cube);
 
     // do not place stones above apples
-    if (apples.every((a) => !isEqualCubePositions(a, pos))) {
-      stones.push(pos);
+    if (state.apples.every((a) => !isEqualCubePositions(a, pos))) {
+      state.stones.push(pos);
     }
   }
-
-  state.stones = stones;
 
   state.scene.cube.sides.forEach((side) => (side.needsRedraw = true));
 }
 
 export function startOrPauseGame(state: GameState): void {
-  if (
-    state.status === EGameStatus.Welcome ||
-    state.status === EGameStatus.Paused
-  ) {
-    state.status = EGameStatus.InGame;
-  } else if (
-    state.status === EGameStatus.Win ||
-    state.status === EGameStatus.Fail
-  ) {
-    plantObjects(state);
-    state.status = EGameStatus.InGame;
-  } else if (state.status === EGameStatus.InGame) {
-    state.status = EGameStatus.Paused;
+  switch (state.status) {
+    case EGameStatus.Welcome:
+    case EGameStatus.Paused:
+      state.status = EGameStatus.InGame;
+      break;
+    case EGameStatus.Win:
+    case EGameStatus.Fail:
+      plantObjects(state);
+      state.status = EGameStatus.InGame;
+      break;
+    case EGameStatus.InGame:
+      state.status = EGameStatus.Paused;
   }
 
   if (state.status === EGameStatus.InGame) {

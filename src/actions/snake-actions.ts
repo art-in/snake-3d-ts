@@ -27,8 +27,7 @@ export function moveSnake(state: GameState): void {
   const {scene, snake} = state;
   const {grid} = scene.cube;
 
-  // instead of moving each snake part one step ahead, make tail part new head.
-  // positions of all other parts stay the same
+  // instead of moving each snake part one step ahead, move tail to new head
   let head = snake.parts[0];
   let tail = snake.parts.pop();
 

@@ -4,12 +4,7 @@ import projectToRange from '../helpers/project-to-range';
 import ECameraMode from '../models/ECameraMode';
 import GameState from '../models/GameState';
 
-const AUTO_ROTATION_STEP_MIN = 0.5;
-const AUTO_ROTATION_STEP_MAX = 10;
-const AUTO_ROTATION_STEP_RANGE: [number, number] = [
-  AUTO_ROTATION_STEP_MIN,
-  AUTO_ROTATION_STEP_MAX,
-];
+const AUTO_ROTATION_STEP_RANGE: [number, number] = [0.5, 10];
 const AUTO_ROTATION_ANGLE_RANGE: [number, number] = [0, 180];
 
 export function autoRotateLoop(state: GameState): void {
@@ -43,14 +38,17 @@ export function autoRotateLoop(state: GameState): void {
   }
 }
 
-function makeRotationStep(currentAngle: number, targetAngle: number): number {
+function makeRotationStep(
+  currentAngle: Degrees,
+  targetAngle: Degrees
+): Degrees {
   const angleDiff = Math.min(
     Math.abs(currentAngle - targetAngle),
     Math.abs(currentAngle - targetAngle - 360),
     Math.abs(currentAngle - targetAngle + 360)
   );
 
-  if (angleDiff < AUTO_ROTATION_STEP_MIN) {
+  if (angleDiff < AUTO_ROTATION_STEP_RANGE[0]) {
     return targetAngle;
   }
 
@@ -86,5 +84,5 @@ function getRotationDirection(fromDeg: number, toDeg: number): number {
     return -fromDeg + toDeg < 180 ? 1 : -1;
   }
 
-  throw Error('Should not be here');
+  throw Error('unreachable');
 }
